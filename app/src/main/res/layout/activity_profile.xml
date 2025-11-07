@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Profile"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Profile Picture -->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <ImageView
+                android:id="@+id/imgProfilePicture"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:background="@drawable/profile_picture_background"
+                android:scaleType="centerCrop"
+                android:contentDescription="Profile Picture" />
+
+            <ImageView
+                android:id="@+id/ivUploadIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignEnd="@id/imgProfilePicture"
+                android:layout_alignBottom="@id/imgProfilePicture"
+                android:src="@drawable/ic_camera"
+                android:background="@drawable/upload_icon_background"
+                android:padding="8dp"
+                android:contentDescription="Upload photo" />
+
+        </RelativeLayout>
+
+        <!-- Upload/Change Text -->
+        <TextView
+            android:id="@+id/tvUploadChange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload/Change"
+            android:textSize="14sp"
+            android:textColor="@color/colorPrimary"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Full Name Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Họ tên"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nguyễn Văn A"
+            android:inputType="textPersonName"
+            android:padding="16dp"
+            android:background="@drawable/edit_text_border"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Email Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="nguyenvana@example.com"
+            android:inputType="textEmailAddress"
+            android:padding="16dp"
+            android:background="@drawable/edit_text_border"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Phone Number Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Số điện thoại"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="0901234567"
+            android:inputType="phone"
+            android:padding="16dp"
+            android:background="@drawable/edit_text_border"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Gender Dropdown -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Giới tính (optional)"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <Spinner
+            android:id="@+id/spinnerGender"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:padding="16dp"
+            android:background="@drawable/spinner_border"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Save Changes Button -->
+        <Button
+            android:id="@+id/btnSaveChanges"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Lưu thay đổi"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_primary"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Logout Button -->
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Đăng xuất"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_danger" />
+
+    </LinearLayout>
+
+</ScrollView>
