@@ -5,4 +5,8 @@
     <color name="colorPrimary">#4285F4</color>
     <color name="colorPrimaryDark">#3367D6</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="starYellow">#FFC107</color>
+    <color name="tagBackground">#ECECEC</color>
+    <color name="green_success">#4CAF50</color>
+    <color name="blue_primary">#4285F4</color>
 </resources>
