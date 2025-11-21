@@ -1,7 +1,9 @@
 package com.example.nhom15_roomfinder;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -10,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.nhom15_roomfinder.activity.RegisterActivity;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
 import com.google.firebase.FirebaseApp;
 
@@ -17,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private FirebaseManager firebaseManager;
+    private Button btnRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,10 +31,34 @@ public class MainActivity extends AppCompatActivity {
         // Initialize Firebase
         initializeFirebase();
         
+        // Initialize Views
+        initializeViews();
+        
+        // Set Listeners
+        setListeners();
+        
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+    }
+    
+    /**
+     * Initialize Views
+     */
+    private void initializeViews() {
+        btnRegister = findViewById(R.id.btnRegister);
+    }
+    
+    /**
+     * Set Listeners
+     */
+    private void setListeners() {
+        btnRegister.setOnClickListener(v -> {
+            // Navigate to Register Activity
+            Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+            startActivity(intent);
         });
     }
     

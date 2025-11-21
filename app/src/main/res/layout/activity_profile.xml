@@ -36,6 +36,7 @@
                 android:id="@+id/imgProfilePicture"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
+
                 android:scaleType="centerCrop"
                 android:contentDescription="Profile Picture" />
 
@@ -46,6 +47,7 @@
                 android:layout_alignEnd="@id/imgProfilePicture"
                 android:layout_alignBottom="@id/imgProfilePicture"
                 android:src="@drawable/ic_camera"
+
                 android:padding="8dp"
                 android:contentDescription="Upload photo" />
 
@@ -138,6 +140,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:padding="16dp"
+
             android:layout_marginBottom="24dp" />
 
         <!-- Save Changes Button -->

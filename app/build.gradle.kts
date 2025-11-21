@@ -41,7 +41,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+//    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
     // Firebase BOM (Bill of Materials)
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
