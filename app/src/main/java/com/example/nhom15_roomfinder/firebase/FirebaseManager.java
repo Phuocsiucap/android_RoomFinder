@@ -342,6 +342,24 @@ public class FirebaseManager {
     }
     
     /**
+     * Create user profile for Google Sign-In users
+     */
+    public void createGoogleUserProfile(FirebaseUser user,
+                                       OnSuccessListener<Void> successListener,
+                                       OnFailureListener failureListener) {
+        Map<String, Object> userProfile = new HashMap<>();
+        userProfile.put("userId", user.getUid());
+        userProfile.put("email", user.getEmail());
+        userProfile.put("name", user.getDisplayName());
+        userProfile.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
+        userProfile.put("loginProvider", "google");
+        userProfile.put("createdAt", System.currentTimeMillis());
+        userProfile.put("lastLoginAt", System.currentTimeMillis());
+        
+        setDocument("users", user.getUid(), userProfile, successListener, failureListener);
+    }
+    
+    /**
      * Check Firebase connection status
      */
     public boolean isFirebaseConnected() {

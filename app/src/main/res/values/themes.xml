@@ -6,4 +6,12 @@
     </style>
 
     <style name="Theme.Nhom15_RoomFinder" parent="Base.Theme.Nhom15_RoomFinder" />
+    
+    <!-- Fullscreen theme for MainActivity -->
+    <style name="Theme.Nhom15_RoomFinder.Fullscreen" parent="Theme.Nhom15_RoomFinder">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:fitsSystemWindows">false</item>
+    </style>
 </resources>

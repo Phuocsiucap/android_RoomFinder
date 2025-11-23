@@ -58,19 +58,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("com.google.android.material:material:1.9.0")
     
-    // Material Design
-//    implementation 'com.google.android.material:material:1.9.0'
-//
-//    // RecyclerView
-//    implementation 'androidx.recyclerview:recyclerview:1.3.1'
-//
-//    // CardView
-//    implementation 'androidx.cardview:cardview:1.0.0'
-//
-//    // Glide for image loading
-//    implementation 'com.github.bumptech.glide:glide:4.15.1'
-//    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
-//
-//    // Coordinator Layout
-//    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
+
 }

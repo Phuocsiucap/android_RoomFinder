@@ -15,6 +15,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.nhom15_roomfinder.R;
+import com.example.nhom15_roomfinder.activity.HomeActivity;
+import com.example.nhom15_roomfinder.auth.GoogleSignInHelper;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,6 +33,9 @@ public class LoginActivity extends AppCompatActivity {
 
     // Firebase
     private FirebaseManager firebaseManager;
+    
+    // Google Sign-In
+    private GoogleSignInHelper googleSignInHelper;
 
     // Password visibility flag
     private boolean isPasswordVisible = false;
@@ -42,6 +47,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize Firebase
         firebaseManager = FirebaseManager.getInstance();
+        
+        // Initialize Google Sign-In
+        initializeGoogleSignIn();
 
         // Check if user is already logged in
         if (firebaseManager.isUserLoggedIn()) {
@@ -188,13 +196,13 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void navigateToHome() {
         // TODO: Thay HomeActivity bằng activity home thực tế của bạn
-        Toast.makeText(this, "Chuyển đến Home (chưa có HomeActivity)", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Chuyển đến Home (chưa có HomeActivity)", Toast.LENGTH_SHORT).show();
 
         // Uncomment khi đã có HomeActivity
-        // Intent intent = new Intent(this, HomeActivity.class);
-        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        // startActivity(intent);
-        // finish();
+         Intent intent = new Intent(this, HomeActivity.class);
+         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+         startActivity(intent);
+         finish();
     }
 
     /**
@@ -246,13 +254,68 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
+     * Initialize Google Sign-In Helper
+     */
+    private void initializeGoogleSignIn() {
+        googleSignInHelper = new GoogleSignInHelper(this, new GoogleSignInHelper.GoogleSignInCallback() {
+            @Override
+            public void onSuccess(FirebaseUser user) {
+                Log.d(TAG, "Google Sign-In successful: " + user.getUid());
+                String displayName = user.getDisplayName() != null ? user.getDisplayName() : "User";
+                Toast.makeText(LoginActivity.this, 
+                    "Chào mừng " + displayName + "!", 
+                    Toast.LENGTH_SHORT).show();
+                navigateToHome();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Google Sign-In failed: " + error);
+                Toast.makeText(LoginActivity.this, 
+                    "Đăng nhập Google thất bại: " + error, 
+                    Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onLoading(boolean isLoading) {
+                showLoading(isLoading);
+            }
+        });
+    }
+
+    /**
      * Đăng nhập với Google
      */
     private void signInWithGoogle() {
-        Toast.makeText(this,
-                "Tính năng đăng nhập Google sẽ được triển khai sau",
-                Toast.LENGTH_SHORT).show();
-        // TODO: Implement Google Sign-In
+        if (googleSignInHelper != null) {
+            googleSignInHelper.signIn();
+        }
+    }
+
+    /**
+     * Xử lý kết quả từ Google Sign-In
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        // Handle Google Sign-In result
+        if (requestCode == GoogleSignInHelper.RC_SIGN_IN) {
+            if (googleSignInHelper != null) {
+                googleSignInHelper.handleSignInResult(data);
+            }
+        }
+    }
+    
+    /**
+     * Cleanup khi Activity bị destroy
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (googleSignInHelper != null) {
+            googleSignInHelper.cleanup();
+        }
     }
 
     /**
