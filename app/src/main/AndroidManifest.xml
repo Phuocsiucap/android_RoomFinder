@@ -37,7 +37,6 @@
         <activity android:name=".activity.RegisterActivity"/>
         <activity android:name=".activity.ProfileActivity"/>
         <activity android:name=".activity.HomeActivity"/>
-
     </application>
 
 </manifest>
