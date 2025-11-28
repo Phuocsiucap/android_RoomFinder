@@ -3,12 +3,16 @@ package com.example.nhom15_roomfinder.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,15 +22,26 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.nhom15_roomfinder.R;
 import com.example.nhom15_roomfinder.activity.HomeActivity;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
     
     private static final String TAG = "ProfileActivity";
+    private static final String USERS_COLLECTION = "users";
+    
     private FirebaseManager firebaseManager;
     private Uri selectedImageUri;
+    private String currentPhotoUrl;
     
     // UI Components - matching with activity_profile.xml
     private TextView tvTitle;
@@ -39,6 +54,8 @@ public class ProfileActivity extends AppCompatActivity {
     private Spinner spinnerGender;
     private Button btnSaveChanges;
     private Button btnLogout;
+    private Button btnChangePassword;
+    private ProgressBar progressBar;
     
     // Activity Result Launcher for image selection
     private ActivityResultLauncher<Intent> imagePickerLauncher;
@@ -100,9 +117,15 @@ public class ProfileActivity extends AppCompatActivity {
         spinnerGender = findViewById(R.id.spinnerGender);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         btnLogout = findViewById(R.id.btnLogout);
+        btnChangePassword = findViewById(R.id.btnChangePassword);
+        progressBar = findViewById(R.id.progressBar);
         
         // Set default profile picture
         imgProfilePicture.setImageResource(R.drawable.ic_profile_placeholder);
+        
+        // Email field should not be editable (linked to auth)
+        etEmail.setEnabled(false);
+        etEmail.setAlpha(0.7f);
     }
     
     /**
@@ -130,6 +153,11 @@ public class ProfileActivity extends AppCompatActivity {
         
         // Save changes button
         btnSaveChanges.setOnClickListener(v -> saveUserProfile());
+        
+        // Change password button
+        if (btnChangePassword != null) {
+            btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+        }
         
         // Logout button
         btnLogout.setOnClickListener(v -> showLogoutDialog());
@@ -177,19 +205,123 @@ public class ProfileActivity extends AppCompatActivity {
      * Load user profile from Firestore
      */
     private void loadUserProfile(String userId) {
-
-        // TODO: Implement Firestore query to get user profile
-
-        // For now, set placeholder values
-        if (etFullName.getText().toString().trim().isEmpty()) {
-            etFullName.setHint("Nhập họ tên của bạn");
-        }
-        if (etPhoneNumber.getText().toString().trim().isEmpty()) {
-            etPhoneNumber.setHint("Nhập số điện thoại");
-        }
+        showLoading(true);
         
-        Log.d(TAG, "Loading profile for user: " + userId);
-        showToast("Đang tải thông tin người dùng...");
+        firebaseManager.getFirestore()
+            .collection(USERS_COLLECTION)
+            .document(userId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                showLoading(false);
+                if (documentSnapshot.exists()) {
+                    populateUserData(documentSnapshot);
+                } else {
+                    // No profile exists, create one with auth data
+                    createInitialProfile(userId);
+                }
+            })
+            .addOnFailureListener(e -> {
+                showLoading(false);
+                Log.e(TAG, "Error loading profile: " + e.getMessage());
+                showToast("Không thể tải thông tin người dùng");
+            });
+    }
+    
+    /**
+     * Populate UI with user data from Firestore
+     */
+    private void populateUserData(DocumentSnapshot document) {
+        try {
+            // Get data from document
+            String name = document.getString("name");
+            String phone = document.getString("phone");
+            String gender = document.getString("gender");
+            String photoUrl = document.getString("photoUrl");
+            
+            // Populate fields
+            if (name != null && !name.isEmpty()) {
+                etFullName.setText(name);
+            }
+            
+            if (phone != null && !phone.isEmpty()) {
+                etPhoneNumber.setText(phone);
+            }
+            
+            // Set gender spinner
+            if (gender != null && !gender.isEmpty()) {
+                setGenderSpinner(gender);
+            }
+            
+            // Load profile picture
+            if (photoUrl != null && !photoUrl.isEmpty()) {
+                currentPhotoUrl = photoUrl;
+                loadProfileImage(photoUrl);
+            }
+            
+            Log.d(TAG, "Profile data loaded successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing profile data: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Set gender spinner selection
+     */
+    private void setGenderSpinner(String gender) {
+        String[] genderOptions = {"Chọn giới tính", "Nam", "Nữ", "Khác"};
+        for (int i = 0; i < genderOptions.length; i++) {
+            if (genderOptions[i].equals(gender)) {
+                spinnerGender.setSelection(i);
+                break;
+            }
+        }
+    }
+    
+    /**
+     * Load profile image using Glide
+     */
+    private void loadProfileImage(String photoUrl) {
+        try {
+            Glide.with(this)
+                .load(photoUrl)
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .error(R.drawable.ic_profile_placeholder)
+                .circleCrop()
+                .into(imgProfilePicture);
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading profile image: " + e.getMessage());
+            imgProfilePicture.setImageResource(R.drawable.ic_profile_placeholder);
+        }
+    }
+    
+    /**
+     * Create initial profile for new users
+     */
+    private void createInitialProfile(String userId) {
+        FirebaseUser user = firebaseManager.getCurrentUser();
+        if (user == null) return;
+        
+        Map<String, Object> initialProfile = new HashMap<>();
+        initialProfile.put("userId", userId);
+        initialProfile.put("email", user.getEmail());
+        initialProfile.put("name", user.getDisplayName() != null ? user.getDisplayName() : "");
+        initialProfile.put("phone", "");
+        initialProfile.put("gender", "");
+        initialProfile.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : "");
+        initialProfile.put("createdAt", System.currentTimeMillis());
+        
+        firebaseManager.setDocument(USERS_COLLECTION, userId, initialProfile,
+            aVoid -> {
+                Log.d(TAG, "Initial profile created");
+                if (user.getDisplayName() != null) {
+                    etFullName.setText(user.getDisplayName());
+                }
+                if (user.getPhotoUrl() != null) {
+                    loadProfileImage(user.getPhotoUrl().toString());
+                }
+            },
+            e -> Log.e(TAG, "Error creating initial profile: " + e.getMessage())
+        );
     }
     
     /**
@@ -207,36 +339,93 @@ public class ProfileActivity extends AppCompatActivity {
                       spinnerGender.getSelectedItem().toString() : "";
         
         // Show loading
+        showLoading(true);
         btnSaveChanges.setEnabled(false);
         btnSaveChanges.setText("Đang lưu...");
         
-        try {
-            // TODO: Upload image to Firebase Storage if selectedImageUri is not null
-            // TODO: Save user profile to Firestore
-            
-            // Simulate save process
-            saveUserProfileToFirestore(fullName, email, phoneNumber, gender);
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Error saving profile: " + e.getMessage(), e);
-            showToast("Có lỗi xảy ra khi lưu thông tin");
-            resetSaveButton();
+        // If new image selected, upload first then save profile
+        if (selectedImageUri != null) {
+            uploadImageAndSaveProfile(fullName, phoneNumber, gender);
+        } else {
+            // No new image, just save profile data
+            saveProfileToFirestore(fullName, phoneNumber, gender, currentPhotoUrl);
         }
     }
     
     /**
-     * Save user profile to Firestore
+     * Upload image to Firebase Storage and then save profile
      */
-    private void saveUserProfileToFirestore(String fullName, String email, String phone, String gender) {
-        // TODO: Implement actual Firestore save
+    private void uploadImageAndSaveProfile(String fullName, String phone, String gender) {
+        String userId = firebaseManager.getUserId();
+        String imagePath = "profile_images/" + userId + "_" + System.currentTimeMillis() + ".jpg";
         
-        // For now, just show success message
-        new android.os.Handler().postDelayed(() -> {
-            showToast("Đã lưu thông tin thành công!");
-            resetSaveButton();
-        }, 1500);
+        firebaseManager.uploadImageAndGetUrl(selectedImageUri, imagePath,
+            uri -> {
+                String downloadUrl = uri.toString();
+                currentPhotoUrl = downloadUrl;
+                saveProfileToFirestore(fullName, phone, gender, downloadUrl);
+            },
+            e -> {
+                showLoading(false);
+                resetSaveButton();
+                Log.e(TAG, "Error uploading image: " + e.getMessage());
+                showToast("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+            }
+        );
+    }
+    
+    /**
+     * Save profile data to Firestore
+     */
+    private void saveProfileToFirestore(String fullName, String phone, String gender, String photoUrl) {
+        String userId = firebaseManager.getUserId();
         
-        Log.d(TAG, "Saving profile: " + fullName + ", " + email + ", " + phone + ", " + gender);
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("name", fullName);
+        profileData.put("phone", phone);
+        profileData.put("gender", gender);
+        profileData.put("photoUrl", photoUrl != null ? photoUrl : "");
+        profileData.put("updatedAt", System.currentTimeMillis());
+        
+        firebaseManager.updateDocument(USERS_COLLECTION, userId, profileData,
+            aVoid -> {
+                showLoading(false);
+                resetSaveButton();
+                selectedImageUri = null; // Clear selected image
+                showToast("Đã lưu thông tin thành công!");
+                Log.d(TAG, "Profile saved successfully");
+            },
+            e -> {
+                // If update fails (document doesn't exist), try to set
+                profileData.put("userId", userId);
+                profileData.put("email", firebaseManager.getCurrentUser().getEmail());
+                profileData.put("createdAt", System.currentTimeMillis());
+                
+                firebaseManager.setDocument(USERS_COLLECTION, userId, profileData,
+                    aVoid2 -> {
+                        showLoading(false);
+                        resetSaveButton();
+                        selectedImageUri = null;
+                        showToast("Đã lưu thông tin thành công!");
+                    },
+                    e2 -> {
+                        showLoading(false);
+                        resetSaveButton();
+                        Log.e(TAG, "Error saving profile: " + e2.getMessage());
+                        showToast("Có lỗi xảy ra khi lưu thông tin");
+                    }
+                );
+            }
+        );
+    }
+    
+    /**
+     * Show/hide loading indicator
+     */
+    private void showLoading(boolean show) {
+        if (progressBar != null) {
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
     }
     
     /**
@@ -294,6 +483,182 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
+    }
+    
+    /**
+     * Show change password dialog
+     */
+    private void showChangePasswordDialog() {
+        FirebaseUser user = firebaseManager.getCurrentUser();
+        if (user == null) {
+            showToast("Vui lòng đăng nhập lại");
+            return;
+        }
+        
+        // Check if user signed in with email/password (not Google)
+        boolean isEmailUser = false;
+        if (user.getProviderData() != null) {
+            for (com.google.firebase.auth.UserInfo profile : user.getProviderData()) {
+                if ("password".equals(profile.getProviderId())) {
+                    isEmailUser = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!isEmailUser) {
+            showToast("Tài khoản đăng nhập bằng Google không thể đổi mật khẩu tại đây");
+            return;
+        }
+        
+        // Create dialog layout
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 30, 50, 30);
+        
+        EditText etCurrentPassword = new EditText(this);
+        etCurrentPassword.setHint("Mật khẩu hiện tại");
+        etCurrentPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(etCurrentPassword);
+        
+        EditText etNewPassword = new EditText(this);
+        etNewPassword.setHint("Mật khẩu mới");
+        etNewPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.topMargin = 20;
+        etNewPassword.setLayoutParams(params);
+        layout.addView(etNewPassword);
+        
+        EditText etConfirmPassword = new EditText(this);
+        etConfirmPassword.setHint("Xác nhận mật khẩu mới");
+        etConfirmPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        etConfirmPassword.setLayoutParams(params);
+        layout.addView(etConfirmPassword);
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Đổi mật khẩu")
+            .setView(layout)
+            .setPositiveButton("Đổi mật khẩu", (dialog, which) -> {
+                String currentPassword = etCurrentPassword.getText().toString().trim();
+                String newPassword = etNewPassword.getText().toString().trim();
+                String confirmPassword = etConfirmPassword.getText().toString().trim();
+                
+                if (validatePasswordChange(currentPassword, newPassword, confirmPassword)) {
+                    changePassword(currentPassword, newPassword);
+                }
+            })
+            .setNegativeButton("Hủy", null)
+            .show();
+    }
+    
+    /**
+     * Validate password change inputs
+     */
+    private boolean validatePasswordChange(String currentPassword, String newPassword, String confirmPassword) {
+        if (currentPassword.isEmpty()) {
+            showToast("Vui lòng nhập mật khẩu hiện tại");
+            return false;
+        }
+        
+        if (newPassword.isEmpty()) {
+            showToast("Vui lòng nhập mật khẩu mới");
+            return false;
+        }
+        
+        if (newPassword.length() < 6) {
+            showToast("Mật khẩu mới phải có ít nhất 6 ký tự");
+            return false;
+        }
+        
+        if (!newPassword.equals(confirmPassword)) {
+            showToast("Mật khẩu xác nhận không khớp");
+            return false;
+        }
+        
+        if (currentPassword.equals(newPassword)) {
+            showToast("Mật khẩu mới phải khác mật khẩu hiện tại");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Change user password
+     */
+    private void changePassword(String currentPassword, String newPassword) {
+        showLoading(true);
+        
+        FirebaseUser user = firebaseManager.getCurrentUser();
+        if (user == null || user.getEmail() == null) {
+            showLoading(false);
+            showToast("Có lỗi xảy ra. Vui lòng đăng nhập lại.");
+            return;
+        }
+        
+        // Re-authenticate user first
+        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+        
+        user.reauthenticate(credential)
+            .addOnSuccessListener(aVoid -> {
+                // Now change password
+                user.updatePassword(newPassword)
+                    .addOnSuccessListener(aVoid2 -> {
+                        showLoading(false);
+                        showToast("Đổi mật khẩu thành công!");
+                        Log.d(TAG, "Password changed successfully");
+                    })
+                    .addOnFailureListener(e -> {
+                        showLoading(false);
+                        Log.e(TAG, "Error changing password: " + e.getMessage());
+                        showToast("Lỗi khi đổi mật khẩu: " + e.getMessage());
+                    });
+            })
+            .addOnFailureListener(e -> {
+                showLoading(false);
+                Log.e(TAG, "Re-authentication failed: " + e.getMessage());
+                showToast("Mật khẩu hiện tại không đúng");
+            });
+    }
+    
+    /**
+     * Show forgot password dialog (send reset email)
+     */
+    private void showForgotPasswordDialog() {
+        FirebaseUser user = firebaseManager.getCurrentUser();
+        if (user == null || user.getEmail() == null) {
+            showToast("Không tìm thấy email của bạn");
+            return;
+        }
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Đặt lại mật khẩu")
+            .setMessage("Gửi email đặt lại mật khẩu đến " + user.getEmail() + "?")
+            .setPositiveButton("Gửi", (dialog, which) -> {
+                sendPasswordResetEmail(user.getEmail());
+            })
+            .setNegativeButton("Hủy", null)
+            .show();
+    }
+    
+    /**
+     * Send password reset email
+     */
+    private void sendPasswordResetEmail(String email) {
+        showLoading(true);
+        
+        firebaseManager.sendPasswordResetEmail(email, task -> {
+            showLoading(false);
+            
+            if (task.isSuccessful()) {
+                showToast("Email đặt lại mật khẩu đã được gửi!");
+            } else {
+                String error = task.getException() != null ?
+                    task.getException().getMessage() : "Gửi email thất bại";
+                showToast("Lỗi: " + error);
+            }
+        });
     }
     
     /**
