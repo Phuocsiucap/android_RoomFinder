@@ -7,6 +7,9 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nhom15_roomfinder.activity.HomeActivity;
 import com.example.nhom15_roomfinder.activity.LoginActivity;
@@ -22,14 +25,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        
-        // Initialize Firebase first
+        setContentView(R.layout.activity_main);
+
         initializeFirebase();
-        
-        // Check authentication and navigate accordingly
-        checkAuthenticationAndNavigate();
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
     }
-    
+
     /**
      * Initialize Firebase and check connection status
      */
@@ -37,13 +43,21 @@ public class MainActivity extends AppCompatActivity {
         try {
             // Initialize Firebase App
             FirebaseApp.initializeApp(this);
-            
+
             // Get FirebaseManager instance
             firebaseManager = FirebaseManager.getInstance();
-            
+
             // Check if Firebase is properly connected
             if (firebaseManager.isFirebaseConnected()) {
                 Log.d(TAG, "Firebase connected successfully");
+                Toast.makeText(this, "Firebase connected", Toast.LENGTH_SHORT).show();
+
+                // Check if user is already logged in
+                if (firebaseManager.isUserLoggedIn()) {
+                    Log.d(TAG, "User is logged in: " + firebaseManager.getUserId());
+                } else {
+                    Log.d(TAG, "No user logged in");
+                }
             } else {
                 Log.e(TAG, "Firebase connection failed");
                 Toast.makeText(this, "Firebase connection failed", Toast.LENGTH_SHORT).show();
@@ -53,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     /**
      * Check user authentication and navigate to appropriate screen
      */
@@ -76,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             navigateToLogin();
         }
     }
-    
+
     /**
      * Navigate to HomeActivity
      */
@@ -86,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-    
+
     /**
      * Navigate to LoginActivity
      */

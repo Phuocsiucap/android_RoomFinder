@@ -107,7 +107,7 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="16dp"
                 android:padding="16dp"
-
+                android:background="@drawable/banner_background"
                 android:orientation="vertical">
 
                 <TextView
@@ -341,7 +341,6 @@
 
         </LinearLayout>
         
-
     </ScrollView>
 
     <!-- Bottom Navigation -->
