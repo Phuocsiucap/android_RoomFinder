@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -58,7 +59,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     class UserViewHolder extends RecyclerView.ViewHolder {
         private TextView txtUserInitial, txtUserName, txtUserEmail, txtUserCreated;
-        private Button btnDeleteUser;
+        private ImageButton btnDeleteUser;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -107,11 +108,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 txtUserCreated.setText("Ngày tạo: --");
             }
 
-            btnDeleteUser.setOnClickListener(v -> {
-                if (userId != null && listener != null) {
-                    listener.onDeleteClick(userId);
-                }
-            });
+            if (btnDeleteUser != null) {
+                btnDeleteUser.setOnClickListener(v -> {
+                    if (userId != null && listener != null) {
+                        listener.onDeleteClick(userId);
+                    }
+                });
+            }
         }
     }
 }

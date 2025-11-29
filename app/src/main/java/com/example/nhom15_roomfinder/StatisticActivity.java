@@ -95,15 +95,28 @@ public class StatisticActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
                 });
         } else {
-            firebaseManager.getFirestore()
-                .collection("rooms")
-                .whereGreaterThanOrEqualTo("createdAt", startTime)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    int totalAds = querySnapshot.size();
-                    txtTotalAds.setText(String.valueOf(totalAds));
-                })
-                .addOnFailureListener(e -> {
+            // For time-filtered queries, we need to use Timestamp
+            // Since createdAt might be stored as Timestamp or Long, we'll query all and filter
+            firebaseManager.getCollection("rooms",
+                querySnapshot -> {
+                    int count = 0;
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : querySnapshot) {
+                        Object createdAt = doc.get("createdAt");
+                        if (createdAt != null) {
+                            long createdTime = 0;
+                            if (createdAt instanceof Number) {
+                                createdTime = ((Number) createdAt).longValue();
+                            } else if (createdAt instanceof com.google.firebase.Timestamp) {
+                                createdTime = ((com.google.firebase.Timestamp) createdAt).toDate().getTime();
+                            }
+                            if (createdTime >= startTime) {
+                                count++;
+                            }
+                        }
+                    }
+                    txtTotalAds.setText(String.valueOf(count));
+                },
+                e -> {
                     Toast.makeText(this, "Lỗi tải số lượng tin: " + e.getMessage(), 
                         Toast.LENGTH_SHORT).show();
                 });
@@ -121,23 +134,46 @@ public class StatisticActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
                 });
         } else {
-            firebaseManager.getFirestore()
-                .collection("users")
-                .whereGreaterThanOrEqualTo("createdAt", startTime)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    int totalUsers = querySnapshot.size();
-                    txtActiveUsers.setText(String.valueOf(totalUsers));
-                })
-                .addOnFailureListener(e -> {
+            firebaseManager.getCollection("users",
+                querySnapshot -> {
+                    int count = 0;
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : querySnapshot) {
+                        Object createdAt = doc.get("createdAt");
+                        if (createdAt != null) {
+                            long createdTime = 0;
+                            if (createdAt instanceof Number) {
+                                createdTime = ((Number) createdAt).longValue();
+                            } else if (createdAt instanceof com.google.firebase.Timestamp) {
+                                createdTime = ((com.google.firebase.Timestamp) createdAt).toDate().getTime();
+                            }
+                            if (createdTime >= startTime) {
+                                count++;
+                            }
+                        }
+                    }
+                    txtActiveUsers.setText(String.valueOf(count));
+                },
+                e -> {
                     Toast.makeText(this, "Lỗi tải số lượng người dùng: " + e.getMessage(), 
                         Toast.LENGTH_SHORT).show();
                 });
         }
 
-        // Load total views (placeholder - implement actual view tracking if needed)
-        // For now, we'll calculate based on rooms count or use a placeholder
-        txtTotalViews.setText("0");
+        // Load total views (calculate from all rooms)
+        firebaseManager.getCollection("rooms",
+            querySnapshot -> {
+                int totalViews = 0;
+                for (com.google.firebase.firestore.QueryDocumentSnapshot doc : querySnapshot) {
+                    Object viewsObj = doc.get("views");
+                    if (viewsObj instanceof Number) {
+                        totalViews += ((Number) viewsObj).intValue();
+                    }
+                }
+                txtTotalViews.setText(String.valueOf(totalViews));
+            },
+            e -> {
+                txtTotalViews.setText("0");
+            });
     }
 
     private long getStartTimeForFilter(String filter) {

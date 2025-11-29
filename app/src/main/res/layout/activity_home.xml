@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white">
@@ -28,7 +29,7 @@
                     android:id="@+id/imgLogo"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_logo"
+                    android:src="@drawable/ic_home"
                     android:contentDescription="Logo" />
 
                 <TextView
@@ -141,7 +142,7 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_affordable"
+                        android:src="@drawable/ic_home"
                         android:background="@drawable/category_icon_background"
                         android:padding="12dp"
                         android:contentDescription="Affordable" />
@@ -170,7 +171,7 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_ac"
+                        android:src="@drawable/ic_search"
                         android:background="@drawable/category_icon_background"
                         android:padding="12dp"
                         android:contentDescription="Air Conditioner" />
@@ -199,7 +200,7 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_school"
+                        android:src="@drawable/ic_location"
                         android:background="@drawable/category_icon_background"
                         android:padding="12dp"
                         android:contentDescription="Near School" />
@@ -228,7 +229,7 @@
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_spacious"
+                        android:src="@drawable/ic_favorite"
                         android:background="@drawable/category_icon_background"
                         android:padding="12dp"
                         android:contentDescription="Spacious" />
@@ -297,15 +298,15 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginBottom="12dp" />
 
+            <!-- Banner đăng ký -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvSuggestedRooms"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:layout_marginBottom="24dp" />
+                android:paddingEnd="16dp" />
 
-            <!-- Banner đăng ký -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -339,7 +340,7 @@
             </LinearLayout>
 
         </LinearLayout>
-
+        
     </ScrollView>
 
     <!-- Bottom Navigation -->

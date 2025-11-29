@@ -1,3 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nhom15_RoomFinder</string>
+    <string name="review_host_place">Đánh giá chủ nhà / nơi ở</string>
+    <string name="back_button">Quay lại</string>
+    <string name="property_image">Ảnh chủ nhà/nơi ở</string>
+    <string name="host_name_property_name">Tên chủ nhà / Tên tài sản</string>
+    <string name="rating_count">4.5 (120 đánh giá)</string>
+    <string name="your_rating">Đánh giá của bạn</string>
+    <string name="comment_label">Nhận xét</string>
+    <string name="comment_hint">Viết nhận xét của bạn về trải nghiệm...</string>
+    <string name="tag_clean">Sạch sẽ</string>
+    <string name="tag_friendly">Thân thiện</string>
+    <string name="tag_accurate">Đúng mô tả</string>
+    <string name="tag_quick_support">Hỗ trợ nhanh</string>
+    <string name="tag_safe">An toàn</string>
+    <string name="submit_review">Gửi đánh giá</string>
+
+    <string name="success_icon_desc">Icon xác nhận thành công</string>
+    <string name="success_title">Cảm ơn bạn đã đánh giá!</string>
+    <string name="success_message">Đánh giá của bạn đã được gửi thành công đến chủ nhà / hệ thống.</string>
+    <string name="back_to_home">Quay lại trang chủ</string>
+    <string name="view_my_reviews">Xem đánh giá của tôi</string>
 </resources>

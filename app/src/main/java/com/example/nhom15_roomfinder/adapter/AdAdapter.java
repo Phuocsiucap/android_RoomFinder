@@ -3,7 +3,7 @@ package com.example.nhom15_roomfinder.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,7 +63,7 @@ public class AdAdapter extends RecyclerView.Adapter<AdAdapter.AdViewHolder> {
     class AdViewHolder extends RecyclerView.ViewHolder {
         private ImageView imgAd;
         private TextView txtAdTitle, txtAdLocation, txtAdPrice, txtAdStatus;
-        private Button btnEdit, btnDelete;
+        private ImageButton btnEdit, btnDelete;
 
         public AdViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -78,19 +78,46 @@ public class AdAdapter extends RecyclerView.Adapter<AdAdapter.AdViewHolder> {
 
         public void bind(Map<String, Object> ad) {
             String title = (String) ad.get("title");
-            String location = (String) ad.get("location");
+            String address = (String) ad.get("address");
+            String district = (String) ad.get("district");
+            String city = (String) ad.get("city");
             Object priceObj = ad.get("price");
+            String priceDisplay = (String) ad.get("priceDisplay");
+            Object isAvailableObj = ad.get("isAvailable");
+            boolean isAvailable = isAvailableObj instanceof Boolean ? (Boolean) isAvailableObj : false;
             String status = (String) ad.get("status");
             String imageUrl = (String) ad.get("imageUrl");
-            String adId = (String) ad.get("roomId");
+            String thumbnailUrl = (String) ad.get("thumbnailUrl");
+            String roomId = (String) ad.get("roomId");
+            String idField = (String) ad.get("id");
+            final String adId = roomId != null ? roomId : idField;
 
+            // Set title
             txtAdTitle.setText(title != null ? title : "Không có tiêu đề");
-            txtAdLocation.setText(location != null ? location : "Không có địa chỉ");
 
-            if (priceObj != null) {
+            // Build location string from address, district, city
+            StringBuilder locationBuilder = new StringBuilder();
+            if (address != null && !address.isEmpty()) {
+                locationBuilder.append(address);
+            }
+            if (district != null && !district.isEmpty()) {
+                if (locationBuilder.length() > 0) locationBuilder.append(", ");
+                locationBuilder.append(district);
+            }
+            if (city != null && !city.isEmpty()) {
+                if (locationBuilder.length() > 0) locationBuilder.append(", ");
+                locationBuilder.append(city);
+            }
+            String locationStr = locationBuilder.length() > 0 ? locationBuilder.toString() : "Không có địa chỉ";
+            txtAdLocation.setText(locationStr);
+
+            // Set price - prefer priceDisplay if available
+            if (priceDisplay != null && !priceDisplay.isEmpty()) {
+                txtAdPrice.setText(priceDisplay);
+            } else if (priceObj != null) {
                 if (priceObj instanceof Number) {
                     double price = ((Number) priceObj).doubleValue();
-                    txtAdPrice.setText(String.format("%.0f VNĐ", price));
+                    txtAdPrice.setText(String.format("%,.0f VNĐ/tháng", price));
                 } else {
                     txtAdPrice.setText(priceObj.toString() + " VNĐ");
                 }
@@ -98,29 +125,54 @@ public class AdAdapter extends RecyclerView.Adapter<AdAdapter.AdViewHolder> {
                 txtAdPrice.setText("0 VNĐ");
             }
 
-            if (status != null) {
-                txtAdStatus.setText(status.equals("available") ? "Đang hoạt động" : "Đã khóa");
-                txtAdStatus.setTextColor(status.equals("available") ? 
-                    0xFF4CAF50 : 0xFFF44336);
+            // Set status - check both isAvailable and status field
+            boolean isActive = isAvailable && !"blocked".equals(status);
+            if (isActive) {
+                txtAdStatus.setText("Đang hoạt động");
+                txtAdStatus.setTextColor(0xFF4CAF50);
+            } else if ("blocked".equals(status)) {
+                txtAdStatus.setText("Đã khóa");
+                txtAdStatus.setTextColor(0xFFF44336);
             } else {
-                txtAdStatus.setText("Không xác định");
+                txtAdStatus.setText("Không khả dụng");
+                txtAdStatus.setTextColor(0xFFFF9800);
             }
 
-            // Load image - placeholder for now
-            // TODO: Add image loading library (Picasso/Glide) to load images from URL
-            imgAd.setImageResource(android.R.drawable.ic_menu_gallery);
+            // Load image using Glide if available
+            if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+                com.bumptech.glide.Glide.with(itemView.getContext())
+                    .load(thumbnailUrl)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .centerCrop()
+                    .into(imgAd);
+            } else if (imageUrl != null && !imageUrl.isEmpty()) {
+                com.bumptech.glide.Glide.with(itemView.getContext())
+                    .load(imageUrl)
+                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .error(android.R.drawable.ic_menu_gallery)
+                    .centerCrop()
+                    .into(imgAd);
+            } else {
+                imgAd.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
 
-            btnEdit.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onEditClick(ad);
-                }
-            });
+            // Set click listeners
+            if (btnEdit != null) {
+                btnEdit.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onEditClick(ad);
+                    }
+                });
+            }
 
-            btnDelete.setOnClickListener(v -> {
-                if (adId != null && listener != null) {
-                    listener.onDeleteClick(adId);
-                }
-            });
+            if (btnDelete != null) {
+                btnDelete.setOnClickListener(v -> {
+                    if (adId != null && listener != null) {
+                        listener.onDeleteClick(adId);
+                    }
+                });
+            }
         }
     }
 }
