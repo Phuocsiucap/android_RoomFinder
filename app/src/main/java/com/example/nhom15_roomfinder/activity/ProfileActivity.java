@@ -55,6 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Button btnSaveChanges;
     private Button btnLogout;
     private Button btnChangePassword;
+    private Button btnAdminDashboard;
     private ProgressBar progressBar;
     
     // Activity Result Launcher for image selection
@@ -118,6 +119,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         btnLogout = findViewById(R.id.btnLogout);
         btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnAdminDashboard = findViewById(R.id.btnAdminDashboard);
         progressBar = findViewById(R.id.progressBar);
         
         // Set default profile picture
@@ -157,6 +159,11 @@ public class ProfileActivity extends AppCompatActivity {
         // Change password button
         if (btnChangePassword != null) {
             btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+        }
+        
+        // Admin Dashboard button
+        if (btnAdminDashboard != null) {
+            btnAdminDashboard.setOnClickListener(v -> navigateToAdminDashboard());
         }
         
         // Logout button
@@ -237,6 +244,7 @@ public class ProfileActivity extends AppCompatActivity {
             String phone = document.getString("phone");
             String gender = document.getString("gender");
             String photoUrl = document.getString("photoUrl");
+            String role = document.getString("role");
             
             // Populate fields
             if (name != null && !name.isEmpty()) {
@@ -258,10 +266,32 @@ public class ProfileActivity extends AppCompatActivity {
                 loadProfileImage(photoUrl);
             }
             
+            // Check and show admin dashboard button if user is admin
+            checkAndShowAdminButton(role);
+            
             Log.d(TAG, "Profile data loaded successfully");
         } catch (Exception e) {
             Log.e(TAG, "Error parsing profile data: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Check if user is admin and show/hide admin dashboard button
+     */
+    private void checkAndShowAdminButton(String role) {
+        if (btnAdminDashboard != null) {
+            boolean isAdmin = "admin".equals(role);
+            btnAdminDashboard.setVisibility(isAdmin ? View.VISIBLE : View.GONE);
+            Log.d(TAG, "User role: " + role + ", Admin button visible: " + isAdmin);
+        }
+    }
+    
+    /**
+     * Navigate to Admin Dashboard
+     */
+    private void navigateToAdminDashboard() {
+        Intent intent = new Intent(this, com.example.nhom15_roomfinder.AdminDashboardActivity.class);
+        startActivity(intent);
     }
     
     /**
@@ -319,6 +349,8 @@ public class ProfileActivity extends AppCompatActivity {
                 if (user.getPhotoUrl() != null) {
                     loadProfileImage(user.getPhotoUrl().toString());
                 }
+                // Check admin role for new users (default is customer)
+                checkAndShowAdminButton("customer");
             },
             e -> Log.e(TAG, "Error creating initial profile: " + e.getMessage())
         );

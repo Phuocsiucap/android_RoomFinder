@@ -45,9 +45,13 @@
         <activity android:name=".activity.PostRoomActivity"/>
         <activity android:name=".activity.SearchActivity"/>
         <activity android:name=".activity.NotificationActivity"/>
-
-
-
+        
+        <!-- Admin Activities -->
+        <activity android:name=".AdminDashboardActivity"/>
+        <activity android:name=".ActivityListAds"/>
+        <activity android:name=".StatisticActivity"/>
+        <activity android:name=".UserListActivity"/>
+        <activity android:name=".EditRoomActivity"/>
 
     </application>
 
