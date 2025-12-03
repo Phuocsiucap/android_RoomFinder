@@ -1,5 +1,6 @@
 package com.example.nhom15_roomfinder.adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,14 +27,21 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
     private List<Chat> chatList;
     private OnChatClickListener listener;
+    private OnChatLongClickListener longClickListener;
 
     public interface OnChatClickListener {
         void onChatClick(Chat chat);
     }
 
-    public ChatAdapter(List<Chat> chatList, OnChatClickListener listener) {
+    // Thêm interface cho Long Click (để xóa/ghim)
+    public interface OnChatLongClickListener {
+        void onChatLongClick(Chat chat, View view);
+    }
+
+    public ChatAdapter(List<Chat> chatList, OnChatClickListener listener, OnChatLongClickListener longClickListener) {
         this.chatList = chatList;
         this.listener = listener;
+        this.longClickListener = longClickListener;
     }
 
     @NonNull
@@ -66,6 +74,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         private TextView tvLastMessage;
         private TextView tvTime;
         private TextView tvUnreadCount;
+        private ImageView imgPinned; // Thêm icon ghim nếu layout hỗ trợ, hoặc đổi màu background
 
         ChatViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +83,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             tvLastMessage = itemView.findViewById(R.id.tvLastMessage);
             tvTime = itemView.findViewById(R.id.tvTime);
             tvUnreadCount = itemView.findViewById(R.id.tvUnreadCount);
+            // imgPinned = itemView.findViewById(R.id.imgPinned); // Nếu có icon ghim
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -81,12 +91,29 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                     listener.onChatClick(chatList.get(position));
                 }
             });
+
+            // Sự kiện Long Click
+            itemView.setOnLongClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION && longClickListener != null) {
+                    longClickListener.onChatLongClick(chatList.get(position), v);
+                    return true;
+                }
+                return false;
+            });
         }
 
         void bind(Chat chat) {
             tvChatName.setText(chat.getRecipientName());
             tvLastMessage.setText(chat.getLastMessage());
             tvTime.setText(formatTime(chat.getLastMessageTime()));
+
+            // Hiển thị trạng thái ghim (đổi màu nền nhạt hoặc thêm icon)
+            if (chat.isPinned()) {
+                itemView.setBackgroundColor(Color.parseColor("#E8F5E9")); // Màu xanh nhạt
+            } else {
+                itemView.setBackgroundColor(Color.WHITE);
+            }
 
             // Load avatar
             if (chat.getRecipientAvatar() != null && !chat.getRecipientAvatar().isEmpty()) {
@@ -111,6 +138,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         private String formatTime(long timestamp) {
             long now = System.currentTimeMillis();
             long diff = now - timestamp;
+            if (diff < 0) return "Vừa xong"; // Tránh âm
 
             if (diff < TimeUnit.MINUTES.toMillis(1)) {
                 return "Vừa xong";

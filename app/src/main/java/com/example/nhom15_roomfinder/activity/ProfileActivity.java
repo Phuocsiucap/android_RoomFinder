@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -44,6 +45,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String currentPhotoUrl;
     
     // UI Components - matching with activity_profile.xml
+    private ImageButton btnBack;
     private TextView tvTitle;
     private ImageView imgProfilePicture;
     private ImageView ivUploadIcon;
@@ -108,6 +110,7 @@ public class ProfileActivity extends AppCompatActivity {
      * Initialize Views
      */
     private void initializeViews() {
+        btnBack = findViewById(R.id.btnBack);
         tvTitle = findViewById(R.id.tvTitle);
         imgProfilePicture = findViewById(R.id.imgProfilePicture);
         ivUploadIcon = findViewById(R.id.ivUploadIcon);
@@ -148,6 +151,11 @@ public class ProfileActivity extends AppCompatActivity {
      * Set Click Listeners
      */
     private void setListeners() {
+        // Back button
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
         // Profile picture click - change avatar
         imgProfilePicture.setOnClickListener(v -> openImagePicker());
         ivUploadIcon.setOnClickListener(v -> openImagePicker());

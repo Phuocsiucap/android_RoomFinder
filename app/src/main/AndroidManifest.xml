@@ -23,10 +23,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Nhom15_RoomFinder"
         android:usesCleartextTraffic="true">
+        
+        <!-- Đã xóa android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen" để đồng bộ giao diện -->
         <activity
             android:name=".activity.HomeActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
