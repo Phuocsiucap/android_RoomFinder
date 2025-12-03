@@ -183,42 +183,34 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 checkLoadingComplete();
             });
 
-        // Load ads count (only active/available ads)
-        firebaseManager.getFirestore()
-            .collection("rooms")
-            .whereEqualTo("status", "available")
-            .get()
-            .addOnSuccessListener(querySnapshot -> {
+        // Load ads count (all ads, same as ActivityListAds)
+        firebaseManager.getCollection("rooms",
+            querySnapshot -> {
                 int adCount = querySnapshot.size();
                 txtAdCount.setText(String.valueOf(adCount));
                 checkLoadingComplete();
-            })
-            .addOnFailureListener(e -> {
+            },
+            e -> {
                 Log.e(TAG, "Error loading ads: " + e.getMessage());
-                // Fallback to all ads
-                firebaseManager.getCollection("rooms",
-                    querySnapshot -> {
-                        int adCount = querySnapshot.size();
-                        txtAdCount.setText(String.valueOf(adCount));
-                        checkLoadingComplete();
-                    },
-                    e2 -> {
-                        Toast.makeText(this, "Lỗi tải số lượng tin đăng: " + e2.getMessage(), Toast.LENGTH_SHORT).show();
-                        checkLoadingComplete();
-                    });
+                Toast.makeText(this, "Lỗi tải số lượng tin đăng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                txtAdCount.setText("0");
+                checkLoadingComplete();
             });
 
-        // Load total views (calculate from all rooms)
+        // Load number of distinct cities that have room ads
         firebaseManager.getCollection("rooms",
             querySnapshot -> {
-                int totalViews = 0;
+                java.util.Set<String> cities = new java.util.HashSet<>();
                 for (com.google.firebase.firestore.QueryDocumentSnapshot doc : querySnapshot) {
-                    Object viewsObj = doc.get("views");
-                    if (viewsObj instanceof Number) {
-                        totalViews += ((Number) viewsObj).intValue();
+                    String city = doc.getString("city");
+                    if (city != null) {
+                        city = city.trim();
+                    }
+                    if (city != null && !city.isEmpty()) {
+                        cities.add(city);
                     }
                 }
-                txtViews.setText(String.valueOf(totalViews));
+                txtViews.setText(String.valueOf(cities.size()));
                 checkLoadingComplete();
             },
             e -> {

@@ -137,10 +137,16 @@ public class EditRoomActivity extends AppCompatActivity {
     }
 
     private void openImagePicker() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 
+        // Android 13+ dùng READ_MEDIA_IMAGES, các phiên bản cũ dùng READ_EXTERNAL_STORAGE
+        String permission = 
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+                ? Manifest.permission.READ_MEDIA_IMAGES
+                : Manifest.permission.READ_EXTERNAL_STORAGE;
+
+        if (ContextCompat.checkSelfPermission(this, permission) 
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, 
-                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
+                new String[]{permission}, 100);
             return;
         }
 
@@ -164,8 +170,13 @@ public class EditRoomActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(imgSelected);
 
+        // Store the imageUri in the view's tag for easy removal
+        imageItem.setTag(imageUri);
+        
         btnRemove.setOnClickListener(v -> {
+            // Remove from list
             selectedImages.remove(imageUri);
+            // Remove from layout
             layoutImages.removeView(imageItem);
         });
 
@@ -188,12 +199,61 @@ public class EditRoomActivity extends AppCompatActivity {
                 .into(imgSelected);
 
         btnRemove.setOnClickListener(v -> {
+            // Xóa ảnh khỏi danh sách
             existingImageUrls.remove(imageUrl);
             layoutImages.removeView(imageItem);
+            
+            // Xóa file trên Firebase Storage nếu có thể
+            deleteImageFromStorage(imageUrl);
         });
 
         // Add before the add button
         layoutImages.addView(imageItem, layoutImages.getChildCount() - 1);
+    }
+    
+    private void deleteImageFromStorage(String imageUrl) {
+        try {
+            // Lấy path từ URL
+            // URL format: https://firebasestorage.googleapis.com/v0/b/.../o/rooms%2F...%2Fimage.jpg?alt=media&token=...
+            if (imageUrl == null || imageUrl.isEmpty()) return;
+            
+            // Extract path từ URL
+            String path = extractPathFromUrl(imageUrl);
+            if (path == null || path.isEmpty()) return;
+            
+            // Xóa file từ Firebase Storage
+            firebaseManager.getStorageReference()
+                .child(path)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Image deleted from Storage: " + path);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error deleting image from Storage: " + e.getMessage());
+                    // Không hiển thị lỗi cho user vì ảnh đã được xóa khỏi UI
+                });
+        } catch (Exception e) {
+            Log.e(TAG, "Error parsing image URL: " + e.getMessage());
+        }
+    }
+    
+    private String extractPathFromUrl(String url) {
+        try {
+            // URL format: https://firebasestorage.googleapis.com/v0/b/BUCKET/o/PATH?alt=media&token=TOKEN
+            // Cần decode URL encoding (%2F -> /)
+            if (url.contains("/o/")) {
+                int startIndex = url.indexOf("/o/") + 3;
+                int endIndex = url.indexOf("?");
+                if (endIndex == -1) endIndex = url.length();
+                
+                String encodedPath = url.substring(startIndex, endIndex);
+                // Decode URL encoding
+                return java.net.URLDecoder.decode(encodedPath, "UTF-8");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error extracting path from URL: " + e.getMessage());
+        }
+        return null;
     }
 
     private void loadRoomData() {

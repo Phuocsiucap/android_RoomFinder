@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F6FA"
+    android:fitsSystemWindows="true"
     tools:context=".StatisticActivity">
 
     <!-- Toolbar -->
@@ -98,7 +99,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Stats Box 1 -->
+            <!-- Total Ads -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -120,10 +121,11 @@
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:textColor="#757575" />
+
                     <TextView
+                        android:id="@+id/txtTotalAds"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/txtTotalAds"
                         android:text="0"
                         android:textSize="36sp"
                         android:textStyle="bold"
@@ -132,41 +134,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Stats Box 2 -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp"
-                app:cardBackgroundColor="#FFFFFF"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="👁️ Tổng lượt xem"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="#757575" />
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/txtTotalViews"
-                        android:text="0"
-                        android:textSize="36sp"
-                        android:textStyle="bold"
-                        android:textColor="#FF9800"
-                        android:layout_marginTop="8dp" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Stats Box 3 -->
+            <!-- Active Users + Blocked summary -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -188,14 +156,162 @@
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:textColor="#757575" />
+
                     <TextView
+                        android:id="@+id/txtActiveUsers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/txtActiveUsers"
                         android:text="0"
                         android:textSize="36sp"
                         android:textStyle="bold"
                         android:textColor="#1976D2"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtBlockedUsersSummary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Số người dùng bị khóa: 0 (Xem chi tiết)"
+                        android:textSize="14sp"
+                        android:textColor="#1976D2"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Ads status (only active count) -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📌 Trạng thái tin đăng"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#757575" />
+
+                    <TextView
+                        android:id="@+id/txtActiveAds"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Đang hoạt động: 0"
+                        android:textSize="14sp"
+                        android:textColor="#4CAF50"
+                        android:layout_marginTop="8dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Price ranges -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💰 Thống kê theo khoảng giá"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#FF9800" />
+
+                    <TextView
+                        android:id="@+id/txtPriceLow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="&lt; 2.000.000: 0 tin"
+                        android:textSize="14sp"
+                        android:textColor="#4CAF50"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtPriceMid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2.000.000 - 4.000.000: 0 tin"
+                        android:textSize="14sp"
+                        android:textColor="#FF9800"
+                        android:layout_marginTop="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPriceHigh"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="&gt; 4.000.000: 0 tin"
+                        android:textSize="14sp"
+                        android:textColor="#F44336"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Top rooms & cities -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔥 Top tin nhiều lượt xem"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#E91E63" />
+
+                    <TextView
+                        android:id="@+id/txtTopRooms"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="-"
+                        android:textSize="14sp"
+                        android:textColor="#424242"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📍 Top khu vực nhiều tin"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#757575"
+                        android:layout_marginTop="12dp" />
+
+                    <TextView
+                        android:id="@+id/txtTopCities"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="-"
+                        android:textSize="14sp"
+                        android:textColor="#424242"
                         android:layout_marginTop="8dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -204,3 +320,5 @@
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+

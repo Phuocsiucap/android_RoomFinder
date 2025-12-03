@@ -43,6 +43,7 @@ public class ActivityListAds extends AppCompatActivity implements AdAdapter.OnAd
 
     private RecyclerView rvAds;
     private EditText edtSearch;
+    private EditText edtMinPrice, edtMaxPrice;
     private Spinner spinnerFilter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Button btnAddAd;
@@ -75,6 +76,8 @@ public class ActivityListAds extends AppCompatActivity implements AdAdapter.OnAd
     private void initViews() {
         rvAds = findViewById(R.id.rvAds);
         edtSearch = findViewById(R.id.edtSearch);
+        edtMinPrice = findViewById(R.id.edtMinPrice);
+        edtMaxPrice = findViewById(R.id.edtMaxPrice);
         spinnerFilter = findViewById(R.id.spinnerFilter);
         swipeRefreshLayout = findViewById(R.id.swipeRefresh);
         btnAddAd = findViewById(R.id.btnAddAd);
@@ -129,7 +132,7 @@ public class ActivityListAds extends AppCompatActivity implements AdAdapter.OnAd
     }
 
     private void setupSearch() {
-        edtSearch.addTextChangedListener(new TextWatcher() {
+        TextWatcher watcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -140,11 +143,41 @@ public class ActivityListAds extends AppCompatActivity implements AdAdapter.OnAd
 
             @Override
             public void afterTextChanged(Editable s) {}
-        });
+        };
+
+        edtSearch.addTextChangedListener(watcher);
+        if (edtMinPrice != null) {
+            edtMinPrice.addTextChangedListener(watcher);
+        }
+        if (edtMaxPrice != null) {
+            edtMaxPrice.addTextChangedListener(watcher);
+        }
     }
 
     private void applyFilters() {
         String query = edtSearch.getText().toString().toLowerCase();
+
+        // Parse price range
+        double minPrice = -1;
+        double maxPrice = -1;
+        try {
+            if (edtMinPrice != null) {
+                String minStr = edtMinPrice.getText().toString().trim();
+                if (!minStr.isEmpty()) {
+                    minPrice = Double.parseDouble(minStr);
+                }
+            }
+            if (edtMaxPrice != null) {
+                String maxStr = edtMaxPrice.getText().toString().trim();
+                if (!maxStr.isEmpty()) {
+                    maxPrice = Double.parseDouble(maxStr);
+                }
+            }
+        } catch (NumberFormatException e) {
+            // Nếu nhập sai định dạng, bỏ qua filter giá
+            minPrice = -1;
+            maxPrice = -1;
+        }
         filteredAdsList.clear();
 
         for (Map<String, Object> ad : allAdsList) {
@@ -182,7 +215,24 @@ public class ActivityListAds extends AppCompatActivity implements AdAdapter.OnAd
                              (city != null && city.toLowerCase().contains(query));
             }
 
-            if (statusMatch && searchMatch) {
+            // Apply price filter
+            boolean priceMatch = true;
+            if (minPrice >= 0 || maxPrice >= 0) {
+                Object priceObj = ad.get("price");
+                double price = 0;
+                if (priceObj instanceof Number) {
+                    price = ((Number) priceObj).doubleValue();
+                } else if (priceObj != null) {
+                    try {
+                        price = Double.parseDouble(priceObj.toString());
+                    } catch (NumberFormatException ignored) {}
+                }
+
+                if (minPrice >= 0 && price < minPrice) priceMatch = false;
+                if (maxPrice >= 0 && price > maxPrice) priceMatch = false;
+            }
+
+            if (statusMatch && searchMatch && priceMatch) {
                 filteredAdsList.add(ad);
             }
         }

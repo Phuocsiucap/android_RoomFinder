@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F6FA"
+    android:fitsSystemWindows="true"
     tools:context=".ListAdsActivity">
 
     <!-- Toolbar -->
@@ -109,7 +110,8 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
             app:cardElevation="1dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="#FFFFFF"
+            android:layout_marginBottom="12dp">
 
             <Spinner
                 android:id="@+id/spinnerFilter"
@@ -118,6 +120,38 @@
                 android:paddingHorizontal="16dp"
                 android:background="@android:color/transparent" />
         </androidx.cardview.widget.CardView>
+
+        <!-- Price Range Filters -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/edtMinPrice"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@android:color/white"
+                android:hint="Giá từ (VNĐ)"
+                android:inputType="number"
+                android:paddingHorizontal="12dp"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp" />
+
+            <EditText
+                android:id="@+id/edtMaxPrice"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@android:color/white"
+                android:hint="Giá đến (VNĐ)"
+                android:inputType="number"
+                android:paddingHorizontal="12dp"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- SwipeRefreshLayout with RecyclerView -->
