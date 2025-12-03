@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
+    <!-- Bottom Navigation (Ghim đáy) -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        app:elevation="8dp"
+        app:menu="@menu/bottom_navigation_menu"
+        app:labelVisibilityMode="labeled"/>
+
+    <!-- Main Content (Nằm trên Bottom Nav) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingBottom="56dp">
+        android:layout_above="@id/bottomNavigation"
+        android:orientation="vertical">
 
         <!-- Header -->
         <TextView
@@ -20,6 +32,7 @@
             android:textStyle="bold"
             android:gravity="center_vertical"
             android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:textColor="@android:color/black"
             android:background="#FFFFFF"
             android:elevation="4dp" />
@@ -30,64 +43,59 @@
             android:layout_height="1dp"
             android:background="#E0E0E0" />
 
-        <!-- Empty State -->
-        <LinearLayout
-            android:id="@+id/layoutEmpty"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_favorite"
-                android:alpha="0.3" />
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/layoutEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone">
 
-            <TextView
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_favorite"
+                    android:alpha="0.3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa có phòng yêu thích"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nhấn vào icon trái tim để thêm phòng yêu thích"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/darker_gray"
+                    android:layout_marginTop="8dp" />
+
+            </LinearLayout>
+
+            <!-- Loading -->
+            <ProgressBar
+                android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Chưa có phòng yêu thích"
-                android:textSize="16sp"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginTop="16dp" />
+                android:layout_gravity="center"
+                android:visibility="gone" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nhấn vào icon trái tim để thêm phòng yêu thích"
-                android:textSize="14sp"
-                android:textColor="@android:color/darker_gray"
-                android:layout_marginTop="8dp" />
+            <!-- Favorite List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFavorites"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-        </LinearLayout>
-
-        <!-- Loading -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="32dp"
-            android:visibility="gone" />
-
-        <!-- Favorite List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvFavorites"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        </FrameLayout>
 
     </LinearLayout>
 
-    <!-- Bottom Navigation -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom"
-        android:background="#FFFFFF"
-        app:elevation="8dp"
-        app:menu="@menu/bottom_navigation_menu" />
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>

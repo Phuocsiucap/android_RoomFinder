@@ -18,7 +18,7 @@
             android:layout_marginTop="100dp"
             android:visibility="gone" />
 
-        <!-- Image Gallery -->
+        <!-- Image Gallery & Buttons Overlay -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="250dp">
@@ -29,6 +29,25 @@
                 android:layout_height="match_parent"
                 android:background="#CCCCCC" />
 
+            <!-- Gradient Shadow for better visibility of buttons -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@drawable/gradient_top_shadow"
+                android:visibility="visible"/>
+
+            <!-- Back Button (New) -->
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_back"
+                android:background="@drawable/circle_background"
+                android:padding="8dp"
+                android:elevation="4dp" />
+
             <!-- Favorite Button -->
             <ImageView
                 android:id="@+id/imgFavorite"
@@ -38,7 +57,8 @@
                 android:layout_margin="16dp"
                 android:src="@drawable/ic_favorite"
                 android:background="@drawable/circle_background"
-                android:padding="8dp" />
+                android:padding="8dp"
+                android:elevation="4dp" />
 
         </FrameLayout>
 
@@ -124,6 +144,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/layoutWifi"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -144,6 +165,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/layoutAC"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -164,6 +186,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/layoutParking"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -189,7 +212,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Bạn đã có lệ"
+                android:text="Vị trí"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -256,6 +279,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -263,10 +287,20 @@
                     android:id="@+id/btnCall"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:layout_weight="1"
                     android:backgroundTint="#2196F3"
                     android:text="Gọi"
+                    android:textColor="#FFFFFF" />
+
+                <Button
+                    android:id="@+id/btnBooking"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#FF9800"
+                    android:text="Đặt lịch"
                     android:textColor="#FFFFFF" />
 
                 <Button

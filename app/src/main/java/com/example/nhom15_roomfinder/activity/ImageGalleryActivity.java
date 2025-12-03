@@ -1,9 +1,10 @@
-package com.example.nhom15_roomfinder.activity; // Đổi cho đúng package của bạn
+package com.example.nhom15_roomfinder.activity;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -11,51 +12,51 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.nhom15_roomfinder.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ImageGalleryActivity extends AppCompatActivity {
 
-    private ImageButton btnClose, btnPrevious, btnNext;
+    private ImageButton btnClose;
     private ViewPager2 viewPager;
     private TextView tvImageCounter;
 
     private ImageGalleryAdapter adapter;
-    private List<Integer> images;
+    private ArrayList<String> imageUrls;
+    private int initialPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_image_gallery); // Đổi đúng tên file XML bạn upload
+        setContentView(R.layout.activity_image_gallery);
+
+        if (getIntent() != null) {
+            imageUrls = getIntent().getStringArrayListExtra("imageUrls");
+            initialPosition = getIntent().getIntExtra("initialPosition", 0);
+        }
+
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            Toast.makeText(this, "Không có ảnh để hiển thị", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         initViews();
-        loadImages();
         setupViewPager();
         setupButtons();
     }
 
     private void initViews() {
         btnClose = findViewById(R.id.btnClose);
-        btnPrevious = findViewById(R.id.btnPrevious);
-        btnNext = findViewById(R.id.btnNext);
         viewPager = findViewById(R.id.imageGalleryPager);
         tvImageCounter = findViewById(R.id.tvImageCounter);
     }
 
-    private void loadImages() {
-        // Demo — sau này bạn truyền list ảnh thật vào
-        images = new ArrayList<>();
-        images.add(R.drawable.ic_image);
-        images.add(R.drawable.ic_spacious);
-        images.add(R.drawable.ic_affordable);
-        images.add(R.drawable.ic_home);
-        images.add(R.drawable.ic_wifi);
-    }
-
     private void setupViewPager() {
-        adapter = new ImageGalleryAdapter(images);
+        // Sửa lại constructor, truyền thêm context (this)
+        adapter = new ImageGalleryAdapter(this, imageUrls);
         viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(initialPosition, false); // Set ảnh ban đầu
 
-        updateCounter(0);
+        updateCounter(initialPosition);
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -66,25 +67,10 @@ public class ImageGalleryActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-
         btnClose.setOnClickListener(v -> finish());
-
-        btnPrevious.setOnClickListener(v -> {
-            int current = viewPager.getCurrentItem();
-            if (current > 0) {
-                viewPager.setCurrentItem(current - 1, true);
-            }
-        });
-
-        btnNext.setOnClickListener(v -> {
-            int current = viewPager.getCurrentItem();
-            if (current < images.size() - 1) {
-                viewPager.setCurrentItem(current + 1, true);
-            }
-        });
     }
 
     private void updateCounter(int position) {
-        tvImageCounter.setText((position + 1) + " / " + images.size());
+        tvImageCounter.setText((position + 1) + " / " + imageUrls.size());
     }
 }
