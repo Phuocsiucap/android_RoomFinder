@@ -127,10 +127,16 @@ public class PostRoomActivity extends AppCompatActivity {
     }
 
     private void openImagePicker() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        // Android 13+ dùng READ_MEDIA_IMAGES, các phiên bản cũ dùng READ_EXTERNAL_STORAGE
+        String permission = 
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+                ? Manifest.permission.READ_MEDIA_IMAGES
+                : Manifest.permission.READ_EXTERNAL_STORAGE;
+
+        if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
+                    new String[]{permission}, 100);
             return;
         }
 
@@ -140,6 +146,8 @@ public class PostRoomActivity extends AppCompatActivity {
     }
 
     private void addImageToLayout(Uri imageUri) {
+        if (layoutImages == null) return;
+        
         // Create image view
         View imageItem = LayoutInflater.from(this)
                 .inflate(R.layout.item_selected_image, layoutImages, false);
@@ -152,9 +160,13 @@ public class PostRoomActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(imgSelected);
 
-        int index = selectedImages.size() - 1;
+        // Store the imageUri in the view's tag for easy removal
+        imageItem.setTag(imageUri);
+        
         btnRemove.setOnClickListener(v -> {
+            // Remove from list
             selectedImages.remove(imageUri);
+            // Remove from layout
             layoutImages.removeView(imageItem);
         });
 
