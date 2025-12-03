@@ -15,4 +15,27 @@
         <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:textSize">14sp</item>
     </style>
+
+    <!-- Admin text styles -->
+    <style name="AdminTextTitleLarge">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#212121</item>
+    </style>
+
+    <style name="AdminTextTitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#212121</item>
+    </style>
+
+    <style name="AdminTextBody">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#424242</item>
+    </style>
+
+    <style name="AdminTextCaption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">#757575</item>
+    </style>
 </resources>

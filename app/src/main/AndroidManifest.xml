@@ -23,11 +23,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Nhom15_RoomFinder"
         android:usesCleartextTraffic="true">
-        
-        <!-- Đã xóa android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen" để đồng bộ giao diện -->
         <activity
             android:name=".activity.HomeActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,13 +45,9 @@
         <activity android:name=".activity.PostRoomActivity"/>
         <activity android:name=".activity.SearchActivity"/>
         <activity android:name=".activity.NotificationActivity"/>
-        
-        <!-- Admin Activities -->
-        <activity android:name=".AdminDashboardActivity"/>
-        <activity android:name=".ActivityListAds"/>
-        <activity android:name=".StatisticActivity"/>
-        <activity android:name=".UserListActivity"/>
-        <activity android:name=".EditRoomActivity"/>
+
+
+
 
     </application>
 

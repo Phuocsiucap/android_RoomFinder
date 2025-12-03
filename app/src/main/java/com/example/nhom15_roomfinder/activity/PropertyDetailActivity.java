@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -41,8 +40,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
     private TextView tvOwnerName, tvOwnerPhone, tvArea;
     private LinearLayout layoutWifi, layoutAC, layoutParking;
     private ImageView imgFavorite;
-    private ImageButton btnBack;
-    private Button btnCall, btnMessage, btnBooking;
+    private Button btnCall, btnMessage;
     private ProgressBar progressBar;
 
     private PropertyImageAdapter imageAdapter;
@@ -76,15 +74,8 @@ public class PropertyDetailActivity extends AppCompatActivity {
         tvOwnerPhone = findViewById(R.id.tvOwnerPhone);
         btnCall = findViewById(R.id.btnCall);
         btnMessage = findViewById(R.id.btnMessage);
-        btnBooking = findViewById(R.id.btnBooking);
-        btnBack = findViewById(R.id.btnBack);
         progressBar = findViewById(R.id.progressBar);
         imgFavorite = findViewById(R.id.imgFavorite);
-        
-        // Ánh xạ các view tiện ích
-        layoutWifi = findViewById(R.id.layoutWifi);
-        layoutAC = findViewById(R.id.layoutAC);
-        layoutParking = findViewById(R.id.layoutParking);
     }
 
     private void getIntentData() {
@@ -95,7 +86,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
             currentRoom = (Room) intent.getSerializableExtra("room");
             displayRoomData(currentRoom);
             checkFavoriteStatus();
-            incrementViewCount(); // Cập nhật view count khi truyền object
         }
         
         // Hoặc lấy roomId để load từ Firebase
@@ -129,14 +119,12 @@ public class PropertyDetailActivity extends AppCompatActivity {
                     }
                 } else {
                     Toast.makeText(this, "Không tìm thấy thông tin phòng", Toast.LENGTH_SHORT).show();
-                    finish(); // Đóng màn hình nếu không tìm thấy phòng
                 }
             })
             .addOnFailureListener(e -> {
                 showLoading(false);
                 Log.e(TAG, "Error loading room: " + e.getMessage());
                 Toast.makeText(this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
-                finish(); // Đóng màn hình nếu lỗi
             });
     }
 
@@ -153,44 +141,18 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
         // Setup image gallery
         setupImageViewPager(room.getImageUrls());
-        
-        // Hiển thị tiện ích
-        if (layoutWifi != null) {
-            layoutWifi.setVisibility(room.isHasWifi() ? View.VISIBLE : View.GONE);
-        }
-        if (layoutAC != null) {
-            layoutAC.setVisibility(room.isHasAC() ? View.VISIBLE : View.GONE);
-        }
-        if (layoutParking != null) {
-            layoutParking.setVisibility(room.isHasParking() ? View.VISIBLE : View.GONE);
-        }
     }
 
     /**
      * Setup ViewPager cho gallery ảnh
      */
     private void setupImageViewPager(List<String> imageUrls) {
-        final List<String> displayUrls;
         if (imageUrls == null || imageUrls.isEmpty()) {
-            displayUrls = new ArrayList<>();
-            displayUrls.add(""); // Placeholder
-        } else {
-            displayUrls = imageUrls;
+            imageUrls = new ArrayList<>();
+            imageUrls.add(""); // Placeholder
         }
         
-        imageAdapter = new PropertyImageAdapter(this, displayUrls);
-        
-        // Xử lý sự kiện click vào ảnh -> Mở ImageGalleryActivity
-        imageAdapter.setOnImageClickListener(position -> {
-            // Nếu là ảnh placeholder thì không mở
-            if (imageUrls == null || imageUrls.isEmpty()) return;
-
-            Intent intent = new Intent(PropertyDetailActivity.this, ImageGalleryActivity.class);
-            intent.putStringArrayListExtra("imageUrls", new ArrayList<>(displayUrls));
-            intent.putExtra("initialPosition", position);
-            startActivity(intent);
-        });
-
+        imageAdapter = new PropertyImageAdapter(this, imageUrls);
         imageViewPager.setAdapter(imageAdapter);
     }
 
@@ -234,11 +196,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-        // Back button
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> finish());
-        }
-
         // Gọi điện
         btnCall.setOnClickListener(v -> {
             String phone = tvOwnerPhone.getText().toString();
@@ -253,11 +210,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
 
         // Nhắn tin chủ trọ
         btnMessage.setOnClickListener(v -> {
-            if (currentUserId == null) {
-                Toast.makeText(this, "Vui lòng đăng nhập để nhắn tin", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            
             if (currentRoom == null) return;
             
             Intent intent = new Intent(PropertyDetailActivity.this, ChatDetailActivity.class);
@@ -265,22 +217,6 @@ public class PropertyDetailActivity extends AppCompatActivity {
             intent.putExtra("recipientName", currentRoom.getOwnerName());
             intent.putExtra("roomId", currentRoom.getId());
             intent.putExtra("roomTitle", currentRoom.getTitle());
-            startActivity(intent);
-        });
-
-        // Đặt lịch
-        btnBooking.setOnClickListener(v -> {
-            if (currentUserId == null) {
-                Toast.makeText(this, "Vui lòng đăng nhập để đặt lịch", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (currentRoom == null) return;
-
-            Intent intent = new Intent(PropertyDetailActivity.this, BookingActivity.class);
-            intent.putExtra("roomId", currentRoom.getId());
-            intent.putExtra("roomTitle", currentRoom.getTitle());
-            intent.putExtra("ownerId", currentRoom.getOwnerId());
             startActivity(intent);
         });
 

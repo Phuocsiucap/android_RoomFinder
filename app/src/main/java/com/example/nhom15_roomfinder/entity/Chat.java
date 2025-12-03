@@ -15,7 +15,6 @@ public class Chat implements Serializable {
     private int unreadCount;         // Số tin chưa đọc
     private String roomId;           // ID phòng liên quan (nếu có)
     private String roomTitle;        // Tên phòng liên quan
-    private boolean isPinned;        // Trạng thái ghim
 
     // Constructor mặc định (cần cho Firebase)
     public Chat() {}
@@ -27,7 +26,6 @@ public class Chat implements Serializable {
         this.lastMessage = lastMessage;
         this.lastMessageTime = lastMessageTime;
         this.unreadCount = 0;
-        this.isPinned = false;
     }
 
     // Getters and Setters
@@ -57,7 +55,4 @@ public class Chat implements Serializable {
 
     public String getRoomTitle() { return roomTitle; }
     public void setRoomTitle(String roomTitle) { this.roomTitle = roomTitle; }
-
-    public boolean isPinned() { return isPinned; }
-    public void setPinned(boolean pinned) { isPinned = pinned; }
 }

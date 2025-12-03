@@ -21,21 +21,10 @@ public class PropertyImageAdapter extends RecyclerView.Adapter<PropertyImageAdap
 
     private Context context;
     private List<String> imageUrls;
-    private OnImageClickListener listener;
-
-    // Interface lắng nghe sự kiện click
-    public interface OnImageClickListener {
-        void onImageClick(int position);
-    }
 
     public PropertyImageAdapter(Context context, List<String> imageUrls) {
         this.context = context;
         this.imageUrls = imageUrls;
-    }
-
-    // Setter cho listener
-    public void setOnImageClickListener(OnImageClickListener listener) {
-        this.listener = listener;
     }
 
     @NonNull
@@ -59,13 +48,6 @@ public class PropertyImageAdapter extends RecyclerView.Adapter<PropertyImageAdap
         } else {
             holder.imageView.setImageResource(R.drawable.ic_home);
         }
-
-        // Xử lý sự kiện click
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onImageClick(position);
-            }
-        });
     }
 
     @Override
