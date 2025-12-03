@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item type="integer" name="price_min_default">5000000</item>
+    <item type="integer" name="price_max_default">40000000</item>
+
+</resources>

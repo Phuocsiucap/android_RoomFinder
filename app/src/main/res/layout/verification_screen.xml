@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F7F7">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Thanh tiêu đề -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_media_previous"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xác thực chủ nhà"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp" />
+        </LinearLayout>
+
+        <!-- Step box -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="14dp"
+            android:text="Step 2 of 3 – Xác thực chủ nhà"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="#E6F0FF"
+            android:textColor="#2456D3"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"/>
+
+        <!-- Mã định danh -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mã định danh"
+            android:textStyle="bold"
+            android:layout_marginTop="22dp"/>
+
+        <EditText
+            android:id="@+id/edtIdNumber"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Nhập số CMND/CCCD"
+            android:padding="12dp"
+            android:background="@drawable/bg_edit" />
+
+        <!-- Số điện thoại -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Số điện thoại"
+            android:textStyle="bold"
+            android:layout_marginTop="22dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_edit"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_menu_call"/>
+
+            <EditText
+                android:id="@+id/edtPhone"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="0901234567"
+                android:padding="10dp"
+                android:background="@android:color/transparent"
+                android:inputType="phone"/>
+        </LinearLayout>
+
+        <!-- Email -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textStyle="bold"
+            android:layout_marginTop="22dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_edit"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_dialog_email"/>
+
+            <EditText
+                android:id="@+id/edtEmail"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="example@email.com"
+                android:padding="10dp"
+                android:background="@android:color/transparent"
+                android:inputType="textEmailAddress"/>
+        </LinearLayout>
+
+        <!-- Upload ảnh -->
+        <LinearLayout
+            android:id="@+id/layoutUploadImage"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="@drawable/bg_upload"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginTop="26dp">
+
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@android:drawable/ic_menu_camera" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tải lên ảnh giấy tờ tùy thân"
+                android:layout_marginTop="8dp"
+                android:textColor="#555555"/>
+        </LinearLayout>
+
+        <!-- Nút xác thực -->
+        <Button
+            android:id="@+id/btnVerifyNow"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:text="Xác thực ngay"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#1E6FFB"/>
+
+    </LinearLayout>
+
+</ScrollView>
