@@ -9,4 +9,12 @@
     <color name="tagBackground">#ECECEC</color>
     <color name="green_success">#4CAF50</color>
     <color name="blue_primary">#4285F4</color>
+    <color name="green_light">#C8E6C9</color>
+    <!-- Màu xanh đậm -->
+    <color name="green_dark">#2E7D32</color>
+
+    <!-- Màu xám nhạt -->
+    <color name="gray_light">#E0E0E0</color>
+    <!-- Màu xám đậm -->
+    <color name="gray_dark">#616161</color>
 </resources>

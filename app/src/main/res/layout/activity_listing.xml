@@ -45,4 +45,20 @@
         android:padding="16dp"
         android:clipToPadding="false"/>
 
+    <LinearLayout
+        android:id="@+id/emptyStateLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chưa có tin đăng nào"
+        android:textSize="16sp"
+        android:textColor="#888888" />
+    </LinearLayout>
 </LinearLayout>
