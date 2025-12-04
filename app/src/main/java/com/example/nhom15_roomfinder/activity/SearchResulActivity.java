@@ -26,7 +26,7 @@ import java.util.HashSet;
 import com.example.nhom15_roomfinder.R;
 import com.example.nhom15_roomfinder.entity.Room;
 // Sửa lại import này để nhất quán
-import com.example.nhom15_roomfinder.adapter.RoomAdapter;
+import com.example.nhom15_roomfinder.adapter.RoomSearchAdapter;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -75,7 +75,7 @@ public class SearchResulActivity extends AppCompatActivity {
     private Button currentSelectedSortButton = null;
 
     // --- Adapter & dữ liệu ---
-    private RoomAdapter roomAdapter;
+    private RoomSearchAdapter roomAdapter;
     private List<Room> displayedRoomList;
     private List<Room> allRoomsList;
     private FirebaseFirestore firestore;
@@ -158,7 +158,7 @@ public class SearchResulActivity extends AppCompatActivity {
 
         // --- SỬA LỖI Ở ĐÂY ---
         // Vì OnRoomClickListener có 2 phương thức, ta phải triển khai đầy đủ, không dùng lambda được.
-        RoomAdapter.OnRoomClickListener listener = new RoomAdapter.OnRoomClickListener() {
+        RoomSearchAdapter.OnRoomClickListener listener = new RoomSearchAdapter.OnRoomClickListener() {
             @Override
             public void onRoomClick(Room room) {
                 // Khi người dùng nhấn vào một phòng, chuyển sang trang chi tiết
@@ -169,18 +169,11 @@ public class SearchResulActivity extends AppCompatActivity {
                 startActivity(intent);
             }
 
-            @Override
-            public void onFavoriteClick(Room room, int position) {
-                // Xử lý khi người dùng nhấn vào nút yêu thích
-                // Ví dụ: thay đổi trạng thái và cập nhật UI/Firebase
-                // (Bạn có thể sao chép logic từ HomeActivity nếu muốn)
-                Toast.makeText(SearchResulActivity.this, "Đã nhấn yêu thích: " + room.getTitle(), Toast.LENGTH_SHORT).show();
-                // TODO: Bổ sung logic xử lý yêu thích ở đây
-            }
+
         };
 
         // Khởi tạo adapter với listener đã được tạo
-        roomAdapter = new RoomAdapter(this, displayedRoomList, listener);
+        roomAdapter = new RoomSearchAdapter(this, displayedRoomList, listener);
         recyclerViewListings.setAdapter(roomAdapter);
     }
 

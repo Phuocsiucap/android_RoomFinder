@@ -22,8 +22,8 @@
 
         <TextView
             android:id="@+id/tvTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="220dp"
+            android:layout_height="20dp"
             android:text="Room Title"
             android:textStyle="bold"
             android:textSize="16sp"
@@ -32,8 +32,8 @@
 
         <TextView
             android:id="@+id/tvPrice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="220dp"
+            android:layout_height="20dp"
             android:text="Price"
             android:textColor="#FF5722"
             android:textSize="14sp"
@@ -41,8 +41,8 @@
 
         <TextView
             android:id="@+id/tvLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="220dp"
+            android:layout_height="20dp"
             android:text="Location"
             android:textSize="12sp"
             android:maxLines="2"
@@ -50,8 +50,8 @@
 
         <TextView
             android:id="@+id/tvDistance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="220dp"
+            android:layout_height="20dp"
             android:text="Distance"
             android:textSize="12sp"/>
     </LinearLayout>

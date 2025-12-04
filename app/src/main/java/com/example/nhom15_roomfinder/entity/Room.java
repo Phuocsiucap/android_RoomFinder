@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class Room implements Serializable {
     private String id;
+    private String td;
     private String title;
     private String description;
     private double price;
@@ -116,7 +117,13 @@ public class Room implements Serializable {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+    public String getTd() {
+        return td;
+    }
 
+    public void setTd(String td) {
+        this.td = td;
+    }
     public String getDistrict() { return district; }
     public void setDistrict(String district) { this.district = district; }
 
