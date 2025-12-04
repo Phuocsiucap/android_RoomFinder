@@ -194,19 +194,6 @@
             android:textSize="16sp"
             android:background="@drawable/button_outlined"
             android:drawableStart="@drawable/ic_google"
-            android:drawablePadding="12dp"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Facebook Login -->
-        <Button
-            android:id="@+id/btnFacebookLogin"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Continue with Facebook"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:background="@drawable/button_facebook"
-            android:drawableStart="@drawable/ic_facebook"
             android:drawablePadding="12dp" />
 
     </LinearLayout>

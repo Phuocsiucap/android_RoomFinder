@@ -27,6 +27,7 @@ import com.bumptech.glide.Glide;
 import com.example.nhom15_roomfinder.R;
 import com.example.nhom15_roomfinder.activity.HomeActivity;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
+import com.example.nhom15_roomfinder.utils.ImageUploadHelper;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseUser;
@@ -57,6 +58,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Button btnSaveChanges;
     private Button btnLogout;
     private Button btnChangePassword;
+    private Button btnMyPosts;
     private Button btnAdminDashboard;
     private ProgressBar progressBar;
     
@@ -122,6 +124,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
         btnLogout = findViewById(R.id.btnLogout);
         btnChangePassword = findViewById(R.id.btnChangePassword);
+        btnMyPosts = findViewById(R.id.btnMyPosts);
         btnAdminDashboard = findViewById(R.id.btnAdminDashboard);
         progressBar = findViewById(R.id.progressBar);
         
@@ -167,6 +170,14 @@ public class ProfileActivity extends AppCompatActivity {
         // Change password button
         if (btnChangePassword != null) {
             btnChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+        }
+        
+        // My Posts button
+        if (btnMyPosts != null) {
+            btnMyPosts.setOnClickListener(v -> {
+                Intent intent = new Intent(ProfileActivity.this, MyPostsActivity.class);
+                startActivity(intent);
+            });
         }
         
         // Admin Dashboard button
@@ -393,23 +404,27 @@ public class ProfileActivity extends AppCompatActivity {
     }
     
     /**
-     * Upload image to Firebase Storage and then save profile
+     * Upload image to Cloudinary and then save profile
      */
     private void uploadImageAndSaveProfile(String fullName, String phone, String gender) {
         String userId = firebaseManager.getUserId();
-        String imagePath = "profile_images/" + userId + "_" + System.currentTimeMillis() + ".jpg";
         
-        firebaseManager.uploadImageAndGetUrl(selectedImageUri, imagePath,
-            uri -> {
-                String downloadUrl = uri.toString();
-                currentPhotoUrl = downloadUrl;
-                saveProfileToFirestore(fullName, phone, gender, downloadUrl);
-            },
-            e -> {
-                showLoading(false);
-                resetSaveButton();
-                Log.e(TAG, "Error uploading image: " + e.getMessage());
-                showToast("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+        // Sử dụng Cloudinary thay vì Firebase Storage
+        ImageUploadHelper.uploadAvatar(this, selectedImageUri, userId,
+            new ImageUploadHelper.SingleUploadCallback() {
+                @Override
+                public void onSuccess(String imageUrl) {
+                    currentPhotoUrl = imageUrl;
+                    saveProfileToFirestore(fullName, phone, gender, imageUrl);
+                }
+
+                @Override
+                public void onError(String error) {
+                    showLoading(false);
+                    resetSaveButton();
+                    Log.e(TAG, "Error uploading image: " + error);
+                    showToast("Lỗi khi tải ảnh lên. Vui lòng thử lại.");
+                }
             }
         );
     }

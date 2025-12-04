@@ -125,16 +125,22 @@ public class FavoriteActivity extends AppCompatActivity {
             .whereEqualTo("userId", currentUserId)
             .get()
             .addOnSuccessListener(favoriteSnapshots -> {
-                List<String> roomIds = new ArrayList<>();
+                // Dùng Set để loại bỏ roomId trùng lặp
+                java.util.Set<String> roomIdSet = new java.util.LinkedHashSet<>();
                 for (DocumentSnapshot doc : favoriteSnapshots.getDocuments()) {
                     String roomId = doc.getString("roomId");
-                    if (roomId != null) {
-                        roomIds.add(roomId);
+                    if (roomId != null && !roomId.isEmpty()) {
+                        roomIdSet.add(roomId);
                     }
                 }
                 
+                List<String> roomIds = new ArrayList<>(roomIdSet);
+                Log.d(TAG, "Found " + roomIds.size() + " unique favorite roomIds");
+                
                 if (roomIds.isEmpty()) {
                     showLoading(false);
+                    favoriteRooms.clear();
+                    favoriteAdapter.updateData(favoriteRooms);
                     updateEmptyState();
                     return;
                 }
@@ -155,28 +161,79 @@ public class FavoriteActivity extends AppCompatActivity {
     private void loadRoomDetails(List<String> roomIds) {
         favoriteRooms.clear();
         
-        firebaseManager.getFirestore()
-            .collection("rooms")
-            .whereIn("id", roomIds)
-            .get()
-            .addOnSuccessListener(querySnapshot -> {
-                for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                    Room room = doc.toObject(Room.class);
-                    if (room != null) {
-                        room.setId(doc.getId());
-                        room.setFavorite(true);
-                        favoriteRooms.add(room);
+        if (roomIds.isEmpty()) {
+            showLoading(false);
+            updateEmptyState();
+            return;
+        }
+        
+        Log.d(TAG, "Loading room details for " + roomIds.size() + " rooms: " + roomIds);
+        
+        // Chia nhỏ danh sách nếu quá 10 phần tử (giới hạn của whereIn)
+        int batchSize = 10;
+        int totalBatches = (int) Math.ceil((double) roomIds.size() / batchSize);
+        final int[] completedBatches = {0};
+        
+        for (int i = 0; i < roomIds.size(); i += batchSize) {
+            List<String> batch = roomIds.subList(i, Math.min(i + batchSize, roomIds.size()));
+            
+            // Tìm theo document ID
+            firebaseManager.getFirestore()
+                .collection("rooms")
+                .whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    Log.d(TAG, "Found " + querySnapshot.size() + " rooms by document ID");
+                    
+                    // Thêm các phòng tìm được
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        Room room = doc.toObject(Room.class);
+                        if (room != null) {
+                            room.setId(doc.getId());
+                            room.setFavorite(true);
+                            favoriteRooms.add(room);
+                        }
                     }
-                }
-                
-                favoriteAdapter.updateData(favoriteRooms);
-                showLoading(false);
-                updateEmptyState();
-            })
-            .addOnFailureListener(e -> {
-                Log.e(TAG, "Error loading room details: " + e.getMessage());
-                showLoading(false);
-            });
+                    
+                    completedBatches[0]++;
+                    if (completedBatches[0] >= totalBatches) {
+                        // Loại bỏ trùng lặp trước khi hiển thị
+                        removeDuplicates();
+                        Log.d(TAG, "Total favorite rooms loaded: " + favoriteRooms.size());
+                        favoriteAdapter.updateData(favoriteRooms);
+                        showLoading(false);
+                        updateEmptyState();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading room by document ID: " + e.getMessage());
+                    completedBatches[0]++;
+                    if (completedBatches[0] >= totalBatches) {
+                        removeDuplicates();
+                        favoriteAdapter.updateData(favoriteRooms);
+                        showLoading(false);
+                        updateEmptyState();
+                    }
+                });
+        }
+    }
+    
+    /**
+     * Loại bỏ các phòng trùng lặp trong danh sách
+     */
+    private void removeDuplicates() {
+        List<Room> uniqueRooms = new ArrayList<>();
+        List<String> seenIds = new ArrayList<>();
+        
+        for (Room room : favoriteRooms) {
+            if (room.getId() != null && !seenIds.contains(room.getId())) {
+                seenIds.add(room.getId());
+                uniqueRooms.add(room);
+            }
+        }
+        
+        favoriteRooms.clear();
+        favoriteRooms.addAll(uniqueRooms);
     }
 
     /**

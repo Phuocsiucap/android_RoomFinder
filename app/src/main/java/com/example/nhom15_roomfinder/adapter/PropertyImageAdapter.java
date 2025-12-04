@@ -21,10 +21,19 @@ public class PropertyImageAdapter extends RecyclerView.Adapter<PropertyImageAdap
 
     private Context context;
     private List<String> imageUrls;
+    private OnImageClickListener onImageClickListener;
+
+    public interface OnImageClickListener {
+        void onImageClick(int position);
+    }
 
     public PropertyImageAdapter(Context context, List<String> imageUrls) {
         this.context = context;
         this.imageUrls = imageUrls;
+    }
+
+    public void setOnImageClickListener(OnImageClickListener listener) {
+        this.onImageClickListener = listener;
     }
 
     @NonNull
@@ -48,6 +57,13 @@ public class PropertyImageAdapter extends RecyclerView.Adapter<PropertyImageAdap
         } else {
             holder.imageView.setImageResource(R.drawable.ic_home);
         }
+
+        // Set click listener for fullscreen view
+        holder.itemView.setOnClickListener(v -> {
+            if (onImageClickListener != null) {
+                onImageClickListener.onImageClick(position);
+            }
+        });
     }
 
     @Override

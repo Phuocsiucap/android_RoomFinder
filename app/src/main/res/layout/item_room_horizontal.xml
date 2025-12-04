@@ -28,13 +28,16 @@
             <!-- Favorite Icon -->
             <ImageView
                 android:id="@+id/imgFavorite"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
                 android:layout_alignParentEnd="true"
-                android:layout_margin="8dp"
+                android:layout_margin="6dp"
                 android:src="@drawable/ic_favorite"
                 android:background="@drawable/favorite_background"
                 android:padding="6dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:elevation="4dp"
                 android:contentDescription="Favorite" />
 
         </RelativeLayout>

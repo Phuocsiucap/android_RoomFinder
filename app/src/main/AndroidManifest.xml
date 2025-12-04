@@ -42,12 +42,22 @@
         <activity android:name=".activity.ImageGalleryActivity"/>
         <activity android:name=".activity.PropertyDetailActivity"/>
         <activity android:name=".activity.FavoriteActivity"/>
-        <activity android:name=".activity.PostRoomActivity"/>
         <activity android:name=".activity.SearchActivity"/>
+        <activity android:name=".activity.PostRoomActivity"/>
+        <activity android:name=".activity.EditPostActivity"/>
+        <activity android:name=".activity.ListingActivity"/>
         <activity android:name=".activity.NotificationActivity"/>
-
-
-
+        <activity android:name=".activity.MyPostsActivity"/>
+        <activity android:name=".activity.EditRoomActivity"/>
+        <activity android:name=".activity.AppointmentDetailActivity"/>
+        <activity android:name=".activity.FilteredRoomsActivity"/>
+        <activity 
+            android:name=".activity.FullscreenImageActivity"
+            android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen"/>
+        <activity android:name=".AdminDashboardActivity"/>
+        <activity android:name=".UserListActivity"/>
+        <activity android:name=".ActivityListAds"/>
+        <activity android:name=".StatisticActivity"/>
 
     </application>
 

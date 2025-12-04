@@ -10,9 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,38 +31,41 @@ import com.example.nhom15_roomfinder.entity.Room;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
 import com.example.nhom15_roomfinder.utils.ImageUploadHelper;
 import com.google.android.material.chip.Chip;
-import com.google.firebase.firestore.DocumentReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * PostRoomActivity - Màn hình đăng tin phòng trọ mới
+ * EditRoomActivity - Màn hình chỉnh sửa bài đăng phòng trọ
  */
-public class PostRoomActivity extends AppCompatActivity {
+public class EditRoomActivity extends AppCompatActivity {
 
-    private static final String TAG = "PostRoomActivity";
+    private static final String TAG = "EditRoomActivity";
     private static final int MAX_IMAGES = 5;
 
     // UI Components
+    private ImageButton btnBack;
+    private TextView tvTitle;
     private EditText etTitle, etDescription, etPrice, etArea;
     private EditText etAddress, etDistrict, etCity;
     private Chip chipWifi, chipAC, chipParking, chipBathroom, chipKitchen, chipSecurity;
     private LinearLayout layoutImages;
     private CardView btnAddImage;
-    private Button btnSubmit;
+    private Button btnUpdate;
     private ProgressBar progressBar;
+    private Switch switchAvailable;
 
     private FirebaseManager firebaseManager;
     private String currentUserId;
-    private List<Uri> selectedImages = new ArrayList<>();
+    private Room currentRoom;
+    private String roomId;
     
-    // Owner info - tự động lấy từ Firebase
-    private String ownerName = "";
-    private String ownerPhone = "";
+    // Images
+    private List<Uri> newSelectedImages = new ArrayList<>();
+    private List<String> existingImageUrls = new ArrayList<>();
+    private List<String> deletedImageUrls = new ArrayList<>();
 
     // Activity Result Launcher for image picker
     private ActivityResultLauncher<Intent> imagePickerLauncher;
@@ -67,7 +73,7 @@ public class PostRoomActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post_room);
+        setContentView(R.layout.activity_edit_room);
 
         firebaseManager = FirebaseManager.getInstance();
         currentUserId = firebaseManager.getUserId();
@@ -77,37 +83,51 @@ public class PostRoomActivity extends AppCompatActivity {
             return;
         }
 
+        getIntentData();
         initViews();
         setupImagePicker();
         setupListeners();
-        loadOwnerInfo();
+        populateData();
     }
-    
-    /**
-     * Tự động lấy thông tin người đăng (tên, số điện thoại) từ Firebase
-     */
-    private void loadOwnerInfo() {
-        if (currentUserId == null) return;
-        
+
+    private void getIntentData() {
+        if (getIntent() != null) {
+            currentRoom = (Room) getIntent().getSerializableExtra("room");
+            roomId = getIntent().getStringExtra("roomId");
+        }
+
+        if (currentRoom == null && roomId != null) {
+            loadRoomFromFirebase();
+        }
+    }
+
+    private void loadRoomFromFirebase() {
+        showLoading(true);
         firebaseManager.getFirestore()
-            .collection("users")
-            .document(currentUserId)
+            .collection("rooms")
+            .document(roomId)
             .get()
             .addOnSuccessListener(doc -> {
+                showLoading(false);
                 if (doc.exists()) {
-                    ownerName = doc.getString("name");
-                    ownerPhone = doc.getString("phone");
-                    if (ownerName == null) ownerName = "";
-                    if (ownerPhone == null) ownerPhone = "";
-                    Log.d(TAG, "Owner info loaded: " + ownerName + ", " + ownerPhone);
+                    currentRoom = doc.toObject(Room.class);
+                    if (currentRoom != null) {
+                        currentRoom.setId(doc.getId());
+                        populateData();
+                    }
                 }
             })
             .addOnFailureListener(e -> {
-                Log.e(TAG, "Error loading owner info: " + e.getMessage());
+                showLoading(false);
+                Toast.makeText(this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
+                finish();
             });
     }
 
     private void initViews() {
+        btnBack = findViewById(R.id.btnBack);
+        tvTitle = findViewById(R.id.tvTitle);
+        
         etTitle = findViewById(R.id.etTitle);
         etDescription = findViewById(R.id.etDescription);
         etPrice = findViewById(R.id.etPrice);
@@ -125,8 +145,40 @@ public class PostRoomActivity extends AppCompatActivity {
 
         layoutImages = findViewById(R.id.layoutImages);
         btnAddImage = findViewById(R.id.btnAddImage);
-        btnSubmit = findViewById(R.id.btnSubmit);
+        btnUpdate = findViewById(R.id.btnUpdate);
         progressBar = findViewById(R.id.progressBar);
+        switchAvailable = findViewById(R.id.switchAvailable);
+    }
+
+    private void populateData() {
+        if (currentRoom == null) return;
+
+        etTitle.setText(currentRoom.getTitle());
+        etDescription.setText(currentRoom.getDescription());
+        etPrice.setText(String.valueOf((long) currentRoom.getPrice()));
+        etArea.setText(String.valueOf((int) currentRoom.getArea()));
+        etAddress.setText(currentRoom.getAddress());
+        etDistrict.setText(currentRoom.getDistrict());
+        etCity.setText(currentRoom.getCity());
+
+        // Amenities
+        chipWifi.setChecked(currentRoom.isHasWifi());
+        chipAC.setChecked(currentRoom.isHasAC());
+        chipParking.setChecked(currentRoom.isHasParking());
+        chipBathroom.setChecked(currentRoom.isHasPrivateBathroom());
+        chipKitchen.setChecked(currentRoom.isHasKitchen());
+        chipSecurity.setChecked(currentRoom.isHasSecurity());
+        
+        // Status
+        switchAvailable.setChecked(currentRoom.isAvailable());
+
+        // Load existing images
+        if (currentRoom.getImageUrls() != null) {
+            existingImageUrls.addAll(currentRoom.getImageUrls());
+            for (String url : existingImageUrls) {
+                addExistingImageToLayout(url);
+            }
+        }
     }
 
     private void setupImagePicker() {
@@ -135,9 +187,10 @@ public class PostRoomActivity extends AppCompatActivity {
             result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
-                    if (imageUri != null && selectedImages.size() < MAX_IMAGES) {
-                        selectedImages.add(imageUri);
-                        addImageToLayout(imageUri);
+                    int totalImages = existingImageUrls.size() + newSelectedImages.size();
+                    if (imageUri != null && totalImages < MAX_IMAGES) {
+                        newSelectedImages.add(imageUri);
+                        addNewImageToLayout(imageUri);
                     }
                 }
             }
@@ -145,19 +198,21 @@ public class PostRoomActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        btnBack.setOnClickListener(v -> finish());
+
         btnAddImage.setOnClickListener(v -> {
-            if (selectedImages.size() >= MAX_IMAGES) {
+            int totalImages = existingImageUrls.size() + newSelectedImages.size();
+            if (totalImages >= MAX_IMAGES) {
                 Toast.makeText(this, "Tối đa " + MAX_IMAGES + " ảnh", Toast.LENGTH_SHORT).show();
                 return;
             }
             openImagePicker();
         });
 
-        btnSubmit.setOnClickListener(v -> submitRoom());
+        btnUpdate.setOnClickListener(v -> updateRoom());
     }
 
     private void openImagePicker() {
-        // Android 13+ dùng READ_MEDIA_IMAGES, các phiên bản cũ dùng READ_EXTERNAL_STORAGE
         String permission = 
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
                 ? Manifest.permission.READ_MEDIA_IMAGES
@@ -165,8 +220,7 @@ public class PostRoomActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, permission)
                 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{permission}, 100);
+            ActivityCompat.requestPermissions(this, new String[]{permission}, 100);
             return;
         }
 
@@ -175,10 +229,30 @@ public class PostRoomActivity extends AppCompatActivity {
         imagePickerLauncher.launch(intent);
     }
 
-    private void addImageToLayout(Uri imageUri) {
-        if (layoutImages == null) return;
+    private void addExistingImageToLayout(String imageUrl) {
+        View imageItem = LayoutInflater.from(this)
+                .inflate(R.layout.item_selected_image, layoutImages, false);
         
-        // Create image view
+        ImageView imgSelected = imageItem.findViewById(R.id.imgSelected);
+        ImageView btnRemove = imageItem.findViewById(R.id.btnRemove);
+
+        Glide.with(this)
+                .load(imageUrl)
+                .centerCrop()
+                .into(imgSelected);
+
+        imageItem.setTag(imageUrl);
+        
+        btnRemove.setOnClickListener(v -> {
+            existingImageUrls.remove(imageUrl);
+            deletedImageUrls.add(imageUrl);
+            layoutImages.removeView(imageItem);
+        });
+
+        layoutImages.addView(imageItem, layoutImages.getChildCount() - 1);
+    }
+
+    private void addNewImageToLayout(Uri imageUri) {
         View imageItem = LayoutInflater.from(this)
                 .inflate(R.layout.item_selected_image, layoutImages, false);
         
@@ -190,21 +264,17 @@ public class PostRoomActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(imgSelected);
 
-        // Store the imageUri in the view's tag for easy removal
         imageItem.setTag(imageUri);
         
         btnRemove.setOnClickListener(v -> {
-            // Remove from list
-            selectedImages.remove(imageUri);
-            // Remove from layout
+            newSelectedImages.remove(imageUri);
             layoutImages.removeView(imageItem);
         });
 
-        // Add before the add button
         layoutImages.addView(imageItem, layoutImages.getChildCount() - 1);
     }
 
-    private void submitRoom() {
+    private void updateRoom() {
         // Validate input
         String title = etTitle.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
@@ -234,15 +304,10 @@ public class PostRoomActivity extends AppCompatActivity {
 
         showLoading(true);
 
-        // Parse values
         double price = Double.parseDouble(priceStr);
         double area = areaStr.isEmpty() ? 0 : Double.parseDouble(areaStr);
 
-        // Create room object
-        String roomId = UUID.randomUUID().toString();
-        
         Map<String, Object> roomData = new HashMap<>();
-        roomData.put("id", roomId);
         roomData.put("title", title);
         roomData.put("description", description);
         roomData.put("price", price);
@@ -251,41 +316,42 @@ public class PostRoomActivity extends AppCompatActivity {
         roomData.put("address", address);
         roomData.put("district", district);
         roomData.put("city", city);
-        
-        // Amenities
         roomData.put("hasWifi", chipWifi.isChecked());
         roomData.put("hasAC", chipAC.isChecked());
         roomData.put("hasParking", chipParking.isChecked());
         roomData.put("hasPrivateBathroom", chipBathroom.isChecked());
         roomData.put("hasKitchen", chipKitchen.isChecked());
         roomData.put("hasSecurity", chipSecurity.isChecked());
-        
-        // Owner info - tự động thêm tên và số điện thoại người đăng
-        roomData.put("ownerId", currentUserId);
-        roomData.put("ownerName", ownerName);
-        roomData.put("ownerPhone", ownerPhone);
-        roomData.put("isAvailable", true);
-        roomData.put("viewCount", 0);
-        roomData.put("createdAt", System.currentTimeMillis());
+        roomData.put("isAvailable", switchAvailable.isChecked());
         roomData.put("updatedAt", System.currentTimeMillis());
 
-        // Upload images first, then save room
-        if (selectedImages.isEmpty()) {
-            saveRoomToFirestore(roomId, roomData);
+        // Upload new images if any
+        if (!newSelectedImages.isEmpty()) {
+            uploadNewImagesAndUpdate(roomData);
         } else {
-            uploadImagesAndSaveRoom(roomId, roomData);
+            // No new images, just update with existing URLs
+            roomData.put("imageUrls", existingImageUrls);
+            if (!existingImageUrls.isEmpty()) {
+                roomData.put("thumbnailUrl", existingImageUrls.get(0));
+            }
+            saveRoomToFirestore(roomData);
         }
     }
 
-    private void uploadImagesAndSaveRoom(String roomId, Map<String, Object> roomData) {
-        // Sử dụng Cloudinary để upload ảnh (tối đa 5 ảnh)
-        ImageUploadHelper.uploadRoomImages(this, selectedImages, roomId,
+    private void uploadNewImagesAndUpdate(Map<String, Object> roomData) {
+        ImageUploadHelper.uploadRoomImages(this, newSelectedImages, roomId,
             new ImageUploadHelper.MultipleUploadCallback() {
                 @Override
                 public void onAllSuccess(List<String> imageUrls) {
-                    roomData.put("imageUrls", imageUrls);
-                    roomData.put("thumbnailUrl", imageUrls.get(0));
-                    saveRoomToFirestore(roomId, roomData);
+                    // Combine existing and new URLs
+                    List<String> allUrls = new ArrayList<>(existingImageUrls);
+                    allUrls.addAll(imageUrls);
+                    
+                    roomData.put("imageUrls", allUrls);
+                    if (!allUrls.isEmpty()) {
+                        roomData.put("thumbnailUrl", allUrls.get(0));
+                    }
+                    saveRoomToFirestore(roomData);
                 }
 
                 @Override
@@ -295,32 +361,32 @@ public class PostRoomActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String error, int failedIndex) {
-                    Log.e(TAG, "Error uploading image at index " + failedIndex + ": " + error);
                     showLoading(false);
-                    Toast.makeText(PostRoomActivity.this, "Lỗi tải ảnh lên: " + error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditRoomActivity.this, "Lỗi tải ảnh: " + error, Toast.LENGTH_SHORT).show();
                 }
             }
         );
     }
 
-    private void saveRoomToFirestore(String roomId, Map<String, Object> roomData) {
-        firebaseManager.setDocument("rooms", roomId, roomData,
+    private void saveRoomToFirestore(Map<String, Object> roomData) {
+        firebaseManager.updateDocument("rooms", roomId, roomData,
             aVoid -> {
                 showLoading(false);
-                Toast.makeText(this, "Đăng tin thành công!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
                 finish();
             },
             e -> {
                 showLoading(false);
-                Log.e(TAG, "Error saving room: " + e.getMessage());
-                Toast.makeText(this, "Lỗi đăng tin", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error updating room: " + e.getMessage());
+                Toast.makeText(this, "Lỗi cập nhật", Toast.LENGTH_SHORT).show();
             }
         );
     }
 
     private void showLoading(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        btnSubmit.setEnabled(!show);
+        btnUpdate.setEnabled(!show);
     }
 
     private void redirectToLogin() {

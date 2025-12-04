@@ -130,20 +130,55 @@ public class AdminDashboardActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        btnManageUsers.setOnClickListener(v -> {
-            Intent intent = new Intent(AdminDashboardActivity.this, UserListActivity.class);
-            startActivity(intent);
-        });
+        Log.d(TAG, "Setting up click listeners");
+        
+        if (btnManageUsers != null) {
+            Log.d(TAG, "btnManageUsers found, setting click listener");
+            btnManageUsers.setOnClickListener(v -> {
+                Log.d(TAG, "btnManageUsers clicked");
+                try {
+                    Intent intent = new Intent(AdminDashboardActivity.this, UserListActivity.class);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error starting UserListActivity: " + e.getMessage(), e);
+                    Toast.makeText(this, "Lỗi mở quản lý người dùng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.e(TAG, "btnManageUsers is null!");
+        }
 
-        btnManageAds.setOnClickListener(v -> {
-            Intent intent = new Intent(AdminDashboardActivity.this, ActivityListAds.class);
-            startActivity(intent);
-        });
+        if (btnManageAds != null) {
+            Log.d(TAG, "btnManageAds found, setting click listener");
+            btnManageAds.setOnClickListener(v -> {
+                Log.d(TAG, "btnManageAds clicked");
+                try {
+                    Intent intent = new Intent(AdminDashboardActivity.this, ActivityListAds.class);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error starting ActivityListAds: " + e.getMessage(), e);
+                    Toast.makeText(this, "Lỗi mở quản lý tin đăng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.e(TAG, "btnManageAds is null!");
+        }
 
-        btnStatistics.setOnClickListener(v -> {
-            Intent intent = new Intent(AdminDashboardActivity.this, StatisticActivity.class);
-            startActivity(intent);
-        });
+        if (btnStatistics != null) {
+            Log.d(TAG, "btnStatistics found, setting click listener");
+            btnStatistics.setOnClickListener(v -> {
+                Log.d(TAG, "btnStatistics clicked");
+                try {
+                    Intent intent = new Intent(AdminDashboardActivity.this, StatisticActivity.class);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error starting StatisticActivity: " + e.getMessage(), e);
+                    Toast.makeText(this, "Lỗi mở thống kê: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Log.e(TAG, "btnStatistics is null!");
+        }
     }
 
     @Override

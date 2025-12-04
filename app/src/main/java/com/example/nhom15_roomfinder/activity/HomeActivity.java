@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -51,6 +52,10 @@ public class HomeActivity extends AppCompatActivity {
     private RecyclerView rvSuggestedRooms;
     private Button btnPostRoom;
     private BottomNavigationView bottomNavigation;
+    
+    // Filter Tags
+    private TextView filterCheap, filterAC, filterWifi, filterParking, filterNearSchool, filterSpacious;
+    private boolean isCheapSelected, isACSelected, isWifiSelected, isParkingSelected, isNearSchoolSelected, isSpaciousSelected;
 
     // Adapters
     private RoomAdapter newRoomsAdapter;
@@ -120,6 +125,14 @@ public class HomeActivity extends AppCompatActivity {
         // Buttons
         btnPostRoom = findViewById(R.id.btnPostRoom);
         
+        // Filter Tags
+        filterCheap = findViewById(R.id.filterCheap);
+        filterAC = findViewById(R.id.filterAC);
+        filterWifi = findViewById(R.id.filterWifi);
+        filterParking = findViewById(R.id.filterParking);
+        filterNearSchool = findViewById(R.id.filterNearSchool);
+        filterSpacious = findViewById(R.id.filterSpacious);
+        
         // Bottom Navigation
         bottomNavigation = findViewById(R.id.bottomNavigation);
         
@@ -160,24 +173,28 @@ public class HomeActivity extends AppCompatActivity {
         
         // Category buttons
         btnCategoryAffordable.setOnClickListener(v -> {
-            showToast("Tìm phòng giá rẻ");
-            // TODO: Filter rooms by affordable price
+            toggleFilter("cheap");
         });
         
         btnCategoryAC.setOnClickListener(v -> {
-            showToast("Tìm phòng có máy lạnh");
-            // TODO: Filter rooms with AC
+            toggleFilter("ac");
         });
         
         btnCategorySchool.setOnClickListener(v -> {
-            showToast("Tìm phòng gần trường");
-            // TODO: Filter rooms near schools
+            toggleFilter("school");
         });
         
         btnCategorySpaciou.setOnClickListener(v -> {
-            showToast("Tìm phòng rộng");
-            // TODO: Filter spacious rooms
+            toggleFilter("spacious");
         });
+        
+        // Filter tags click listeners
+        if (filterCheap != null) filterCheap.setOnClickListener(v -> toggleFilter("cheap"));
+        if (filterAC != null) filterAC.setOnClickListener(v -> toggleFilter("ac"));
+        if (filterWifi != null) filterWifi.setOnClickListener(v -> toggleFilter("wifi"));
+        if (filterParking != null) filterParking.setOnClickListener(v -> toggleFilter("parking"));
+        if (filterNearSchool != null) filterNearSchool.setOnClickListener(v -> toggleFilter("school"));
+        if (filterSpacious != null) filterSpacious.setOnClickListener(v -> toggleFilter("spacious"));
         
         // Post room button
         btnPostRoom.setOnClickListener(v -> {
@@ -587,6 +604,96 @@ public class HomeActivity extends AppCompatActivity {
         newRoomsAdapter.notifyDataSetChanged();
         nearbyRoomsAdapter.notifyDataSetChanged();
         suggestedRoomsAdapter.notifyDataSetChanged();
+    }
+    
+    /**
+     * Toggle filter selection
+     */
+    private void toggleFilter(String filterType) {
+        switch (filterType) {
+            case "cheap":
+                isCheapSelected = !isCheapSelected;
+                updateFilterUI(filterCheap, isCheapSelected);
+                break;
+            case "ac":
+                isACSelected = !isACSelected;
+                updateFilterUI(filterAC, isACSelected);
+                break;
+            case "wifi":
+                isWifiSelected = !isWifiSelected;
+                updateFilterUI(filterWifi, isWifiSelected);
+                break;
+            case "parking":
+                isParkingSelected = !isParkingSelected;
+                updateFilterUI(filterParking, isParkingSelected);
+                break;
+            case "school":
+                isNearSchoolSelected = !isNearSchoolSelected;
+                updateFilterUI(filterNearSchool, isNearSchoolSelected);
+                break;
+            case "spacious":
+                isSpaciousSelected = !isSpaciousSelected;
+                updateFilterUI(filterSpacious, isSpaciousSelected);
+                break;
+        }
+        applyFilters();
+    }
+    
+    private void updateFilterUI(TextView filterView, boolean isSelected) {
+        if (filterView != null) {
+            filterView.setBackgroundResource(isSelected ? R.drawable.bg_tag_selected : R.drawable.bg_tag_unselected);
+            filterView.setTextColor(getResources().getColor(isSelected ? android.R.color.white : R.color.text_primary));
+        }
+    }
+    
+    /**
+     * Apply filters to room lists
+     */
+    private void applyFilters() {
+        // Mở màn hình FilteredRoomsActivity với các filter đã chọn
+        Intent intent = new Intent(this, FilteredRoomsActivity.class);
+        intent.putExtra("filterCheap", isCheapSelected);
+        intent.putExtra("filterAC", isACSelected);
+        intent.putExtra("filterWifi", isWifiSelected);
+        intent.putExtra("filterParking", isParkingSelected);
+        intent.putExtra("filterNearSchool", isNearSchoolSelected);
+        intent.putExtra("filterSpacious", isSpaciousSelected);
+        
+        // Build filter title
+        StringBuilder title = new StringBuilder("Lọc: ");
+        if (isCheapSelected) title.append("Giá rẻ, ");
+        if (isACSelected) title.append("Điều hòa, ");
+        if (isWifiSelected) title.append("WiFi, ");
+        if (isParkingSelected) title.append("Để xe, ");
+        if (isNearSchoolSelected) title.append("Gần trường, ");
+        if (isSpaciousSelected) title.append("Phòng rộng, ");
+        
+        String titleStr = title.toString();
+        if (titleStr.endsWith(", ")) {
+            titleStr = titleStr.substring(0, titleStr.length() - 2);
+        }
+        intent.putExtra("title", titleStr);
+        
+        startActivity(intent);
+        
+        // Reset filters after navigating
+        resetFilters();
+    }
+    
+    private void resetFilters() {
+        isCheapSelected = false;
+        isACSelected = false;
+        isWifiSelected = false;
+        isParkingSelected = false;
+        isNearSchoolSelected = false;
+        isSpaciousSelected = false;
+        
+        updateFilterUI(filterCheap, false);
+        updateFilterUI(filterAC, false);
+        updateFilterUI(filterWifi, false);
+        updateFilterUI(filterParking, false);
+        updateFilterUI(filterNearSchool, false);
+        updateFilterUI(filterSpacious, false);
     }
     
     /**

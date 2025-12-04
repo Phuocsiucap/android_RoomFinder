@@ -1,11 +1,16 @@
 package com.example.nhom15_roomfinder.activity;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -18,9 +23,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.nhom15_roomfinder.R;
 import com.example.nhom15_roomfinder.entity.ChatMessage;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
+import com.example.nhom15_roomfinder.utils.ImageUploadHelper;
+import com.github.chrisbanes.photoview.PhotoView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -102,16 +110,73 @@ public class ChatDetailActivity extends AppCompatActivity {
         rvMessages = findViewById(R.id.rvMessages);
         tvChatTitle = findViewById(R.id.tvChatTitle);
         
-        if (recipientName != null) {
+        if (recipientName != null && !recipientName.isEmpty()) {
             tvChatTitle.setText(recipientName);
+        } else if (recipientId != null) {
+            // Load tên người nhận từ Firestore
+            loadRecipientName();
         }
+    }
+
+    /**
+     * Load tên người nhận từ Firestore users collection
+     */
+    private void loadRecipientName() {
+        firebaseManager.getFirestore()
+            .collection("users")
+            .document(recipientId)
+            .get()
+            .addOnSuccessListener(doc -> {
+                if (doc.exists()) {
+                    recipientName = doc.getString("name");
+                    if (recipientName == null || recipientName.isEmpty()) {
+                        recipientName = doc.getString("email");
+                    }
+                    if (recipientName != null) {
+                        tvChatTitle.setText(recipientName);
+                    }
+                }
+            })
+            .addOnFailureListener(e -> Log.e(TAG, "Error loading recipient name: " + e.getMessage()));
     }
 
     private void setupRecyclerView() {
         messageList = new ArrayList<>();
         adapter = new ChatMessageAdapter(messageList, currentUserId);
+        
+        // Thêm listener để xem ảnh full khi click
+        adapter.setOnImageClickListener(imageUrl -> showFullImageDialog(imageUrl));
+        
         rvMessages.setLayoutManager(new LinearLayoutManager(this));
         rvMessages.setAdapter(adapter);
+    }
+
+    /**
+     * Hiển thị dialog xem ảnh full với khả năng zoom
+     */
+    private void showFullImageDialog(String imageUrl) {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_image_viewer);
+        
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        
+        PhotoView photoView = dialog.findViewById(R.id.photoView);
+        ImageButton btnClose = dialog.findViewById(R.id.btnClose);
+        
+        // Load ảnh với Glide
+        Glide.with(this)
+                .load(imageUrl)
+                .placeholder(R.drawable.ic_image_placeholder)
+                .error(R.drawable.ic_image_placeholder)
+                .into(photoView);
+        
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        
+        dialog.show();
     }
 
     private void setupImagePicker() {
@@ -124,19 +189,27 @@ public class ChatDetailActivity extends AppCompatActivity {
 
     private void uploadImageAndSend(Uri imageUri) {
         Toast.makeText(this, "Đang gửi ảnh...", Toast.LENGTH_SHORT).show();
-        String fileName = "chat_images/" + UUID.randomUUID().toString() + ".jpg";
         
-        firebaseManager.uploadImageAndGetUrl(imageUri, fileName, 
-            uri -> {
-                // Upload thành công, gửi tin nhắn chứa link ảnh
-                if (chatId == null) {
-                    createNewChatWithImage(uri.toString());
-                } else {
-                    sendImageMessage(chatId, uri.toString());
+        // Sử dụng Cloudinary thay vì Firebase Storage
+        String chatFolder = chatId != null ? chatId : "temp_" + System.currentTimeMillis();
+        
+        ImageUploadHelper.uploadChatImage(this, imageUri, chatFolder, 
+            new ImageUploadHelper.SingleUploadCallback() {
+                @Override
+                public void onSuccess(String imageUrl) {
+                    // Upload thành công, gửi tin nhắn chứa link ảnh
+                    if (chatId == null) {
+                        createNewChatWithImage(imageUrl);
+                    } else {
+                        sendImageMessage(chatId, imageUrl);
+                    }
+                    Toast.makeText(ChatDetailActivity.this, "Đã gửi ảnh", Toast.LENGTH_SHORT).show();
                 }
-            },
-            e -> {
-                Toast.makeText(this, "Lỗi gửi ảnh: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(ChatDetailActivity.this, "Lỗi gửi ảnh: " + error, Toast.LENGTH_SHORT).show();
+                }
             }
         );
     }
@@ -215,7 +288,7 @@ public class ChatDetailActivity extends AppCompatActivity {
     }
     
     private void createNewChatWithImage(String imageUrl) {
-        initChatCreation("[Hình ảnh]", imageUrl);
+        initChatCreation("", imageUrl);
     }
 
     private void initChatCreation(String messageContent, String imageUrl) {
@@ -268,13 +341,13 @@ public class ChatDetailActivity extends AppCompatActivity {
         DatabaseReference chatRef = firebaseManager.getDatabaseReference("chats/" + chatId);
         String msgId = chatRef.child("messages").push().getKey();
 
-        // SỬA LẠI: Dùng constructor 3 tham số, sau đó set ảnh vào
-        ChatMessage chatMessage = new ChatMessage(currentUserId, "[Hình ảnh]", System.currentTimeMillis());
+        // Gửi tin nhắn chỉ có ảnh (không có text)
+        ChatMessage chatMessage = new ChatMessage(currentUserId, "", System.currentTimeMillis());
         chatMessage.setImageUrl(imageUrl);
 
         if (msgId != null) {
             chatRef.child("messages").child(msgId).setValue(chatMessage);
-            updateLastMessage(chatRef, "Đã gửi một ảnh");
+            updateLastMessage(chatRef, "📷 Hình ảnh");
         }
     }
 

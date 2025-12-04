@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -345,22 +346,92 @@ public class FirebaseManager {
     
     /**
      * Create user profile for Google Sign-In users
-     * Mặc định role là "customer"
+     * Kiểm tra user đã tồn tại (theo email) trước khi tạo mới
+     * Tránh ghi đè dữ liệu cũ
      */
     public void createGoogleUserProfile(FirebaseUser user,
                                        OnSuccessListener<Void> successListener,
                                        OnFailureListener failureListener) {
-        Map<String, Object> userProfile = new HashMap<>();
-        userProfile.put("userId", user.getUid());
-        userProfile.put("email", user.getEmail());
-        userProfile.put("name", user.getDisplayName());
-        userProfile.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
-        userProfile.put("loginProvider", "google");
-        userProfile.put("role", "customer"); // Mặc định là customer
-        userProfile.put("createdAt", System.currentTimeMillis());
-        userProfile.put("lastLoginAt", System.currentTimeMillis());
+        String email = user.getEmail();
+        String oderId = user.getUid();
         
-        setDocument("users", user.getUid(), userProfile, successListener, failureListener);
+        // Trước tiên kiểm tra user đã tồn tại theo email chưa
+        db.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener(querySnapshot -> {
+                if (!querySnapshot.isEmpty()) {
+                    // User đã tồn tại với email này
+                    // Chỉ cập nhật lastLoginAt và không ghi đè dữ liệu khác
+                    DocumentSnapshot existingDoc = querySnapshot.getDocuments().get(0);
+                    String existingUserId = existingDoc.getId();
+                    
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("lastLoginAt", System.currentTimeMillis());
+                    
+                    // Nếu userId khác (user đã đăng ký bằng email trước đó, giờ đăng nhập bằng Google)
+                    // Cập nhật thêm photoUrl từ Google nếu chưa có
+                    String existingPhotoUrl = existingDoc.getString("photoUrl");
+                    if ((existingPhotoUrl == null || existingPhotoUrl.isEmpty()) && user.getPhotoUrl() != null) {
+                        updates.put("photoUrl", user.getPhotoUrl().toString());
+                    }
+                    
+                    // Cập nhật loginProvider thêm google nếu chưa có
+                    String loginProvider = existingDoc.getString("loginProvider");
+                    if (loginProvider != null && !loginProvider.contains("google")) {
+                        updates.put("loginProvider", loginProvider + ",google");
+                    }
+                    
+                    db.collection("users").document(existingUserId)
+                        .update(updates)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "Existing user updated: " + existingUserId);
+                            successListener.onSuccess(null);
+                        })
+                        .addOnFailureListener(failureListener);
+                        
+                } else {
+                    // User chưa tồn tại, kiểm tra theo userId
+                    db.collection("users").document(oderId)
+                        .get()
+                        .addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                // User đã tồn tại theo userId, chỉ cập nhật lastLoginAt
+                                Map<String, Object> updates = new HashMap<>();
+                                updates.put("lastLoginAt", System.currentTimeMillis());
+                                
+                                db.collection("users").document(oderId)
+                                    .update(updates)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "Existing user (by UID) updated: " + oderId);
+                                        successListener.onSuccess(null);
+                                    })
+                                    .addOnFailureListener(failureListener);
+                            } else {
+                                // Tạo user mới
+                                Map<String, Object> userProfile = new HashMap<>();
+                                userProfile.put("userId", user.getUid());
+                                userProfile.put("email", user.getEmail());
+                                userProfile.put("name", user.getDisplayName());
+                                userProfile.put("photoUrl", user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null);
+                                userProfile.put("loginProvider", "google");
+                                userProfile.put("role", "customer");
+                                userProfile.put("createdAt", System.currentTimeMillis());
+                                userProfile.put("lastLoginAt", System.currentTimeMillis());
+                                
+                                db.collection("users").document(oderId)
+                                    .set(userProfile)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "New Google user created: " + oderId);
+                                        successListener.onSuccess(null);
+                                    })
+                                    .addOnFailureListener(failureListener);
+                            }
+                        })
+                        .addOnFailureListener(failureListener);
+                }
+            })
+            .addOnFailureListener(failureListener);
     }
     
     /**

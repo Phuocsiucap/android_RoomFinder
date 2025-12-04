@@ -64,5 +64,11 @@ dependencies {
     
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    
+    // OkHttp for Cloudinary upload
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // PhotoView for zoom image
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
 
 }

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Chọn ngày -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ngày xem phòng *"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_edit"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:hint="Chọn ngày"
+        android:textSize="15sp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/gray"
+        android:drawableEnd="@drawable/ic_calendar"
+        android:drawablePadding="8dp" />
+
+    <!-- Chọn giờ -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Giờ xem phòng *"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_edit"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:hint="Chọn giờ"
+        android:textSize="15sp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/gray"
+        android:drawableEnd="@drawable/ic_clock"
+        android:drawablePadding="8dp" />
+
+    <!-- Ghi chú -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ghi chú (tùy chọn)"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/etNote"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@drawable/bg_edit"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:gravity="top"
+        android:hint="Nhập ghi chú cho chủ trọ (nếu có)"
+        android:textSize="15sp"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/gray"
+        android:inputType="textMultiLine"
+        android:maxLines="4" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="* Chủ trọ sẽ nhận được thông báo và xác nhận lịch hẹn của bạn"
+        android:textSize="12sp"
+        android:textColor="@color/gray"
+        android:textStyle="italic" />
+
+</LinearLayout>

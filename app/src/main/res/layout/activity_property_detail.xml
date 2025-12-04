@@ -278,6 +278,19 @@
                     android:text="Nhắn tin"
                     android:textColor="#FFFFFF" />
             </LinearLayout>
+
+            <!-- Book Appointment Button -->
+            <Button
+                android:id="@+id/btnBookAppointment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#FF9800"
+                android:text="Đặt lịch hẹn xem phòng"
+                android:textColor="#FFFFFF"
+                android:drawableStart="@drawable/ic_calendar"
+                android:drawablePadding="8dp"
+                android:drawableTint="#FFFFFF" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

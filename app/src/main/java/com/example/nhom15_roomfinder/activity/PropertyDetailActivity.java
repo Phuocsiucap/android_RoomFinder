@@ -1,29 +1,40 @@
 package com.example.nhom15_roomfinder.activity;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.nhom15_roomfinder.R;
 import com.example.nhom15_roomfinder.adapter.PropertyImageAdapter;
+import com.example.nhom15_roomfinder.entity.Appointment;
+import com.example.nhom15_roomfinder.entity.Notification;
 import com.example.nhom15_roomfinder.entity.Room;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
 import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -40,7 +51,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
     private TextView tvOwnerName, tvOwnerPhone, tvArea;
     private LinearLayout layoutWifi, layoutAC, layoutParking;
     private ImageView imgFavorite;
-    private Button btnCall, btnMessage;
+    private Button btnCall, btnMessage, btnBookAppointment;
     private ProgressBar progressBar;
 
     private PropertyImageAdapter imageAdapter;
@@ -50,6 +61,12 @@ public class PropertyDetailActivity extends AppCompatActivity {
     private Room currentRoom;
     private String roomId;
     private boolean isFavorite = false;
+    
+    // For appointment booking
+    private long selectedDate = 0;
+    private String selectedTime = "";
+    private String currentUserName = "";
+    private String currentUserPhone = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +79,24 @@ public class PropertyDetailActivity extends AppCompatActivity {
         initViews();
         getIntentData();
         setupButtons();
+        loadCurrentUserInfo();
+    }
+    
+    private void loadCurrentUserInfo() {
+        if (currentUserId == null) return;
+        
+        firebaseManager.getFirestore()
+            .collection("users")
+            .document(currentUserId)
+            .get()
+            .addOnSuccessListener(doc -> {
+                if (doc.exists()) {
+                    currentUserName = doc.getString("name");
+                    currentUserPhone = doc.getString("phone");
+                    if (currentUserName == null) currentUserName = "";
+                    if (currentUserPhone == null) currentUserPhone = "";
+                }
+            });
     }
 
     private void initViews() {
@@ -74,6 +109,7 @@ public class PropertyDetailActivity extends AppCompatActivity {
         tvOwnerPhone = findViewById(R.id.tvOwnerPhone);
         btnCall = findViewById(R.id.btnCall);
         btnMessage = findViewById(R.id.btnMessage);
+        btnBookAppointment = findViewById(R.id.btnBookAppointment);
         progressBar = findViewById(R.id.progressBar);
         imgFavorite = findViewById(R.id.imgFavorite);
     }
@@ -152,8 +188,26 @@ public class PropertyDetailActivity extends AppCompatActivity {
             imageUrls.add(""); // Placeholder
         }
         
+        final List<String> finalImageUrls = imageUrls;
         imageAdapter = new PropertyImageAdapter(this, imageUrls);
+        
+        // Set click listener để mở fullscreen image viewer
+        imageAdapter.setOnImageClickListener(position -> {
+            openFullscreenImageViewer(finalImageUrls, position);
+        });
+        
         imageViewPager.setAdapter(imageAdapter);
+    }
+
+    /**
+     * Mở màn hình xem ảnh toàn màn hình
+     */
+    private void openFullscreenImageViewer(List<String> imageUrls, int position) {
+        Intent intent = new Intent(this, FullscreenImageActivity.class);
+        intent.putStringArrayListExtra(FullscreenImageActivity.EXTRA_IMAGE_URLS, 
+                new ArrayList<>(imageUrls));
+        intent.putExtra(FullscreenImageActivity.EXTRA_CURRENT_POSITION, position);
+        startActivity(intent);
     }
 
     /**
@@ -224,6 +278,157 @@ public class PropertyDetailActivity extends AppCompatActivity {
         if (imgFavorite != null) {
             imgFavorite.setOnClickListener(v -> toggleFavorite());
         }
+        
+        // Đặt lịch hẹn
+        if (btnBookAppointment != null) {
+            btnBookAppointment.setOnClickListener(v -> showBookingDialog());
+        }
+    }
+    
+    /**
+     * Hiển thị dialog đặt lịch hẹn
+     */
+    private void showBookingDialog() {
+        if (currentUserId == null) {
+            Toast.makeText(this, "Vui lòng đăng nhập để đặt lịch", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (currentRoom == null) return;
+        
+        // Không cho phép đặt lịch hẹn với phòng của chính mình
+        if (currentUserId.equals(currentRoom.getOwnerId())) {
+            Toast.makeText(this, "Không thể đặt lịch hẹn với phòng của bạn", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_book_appointment, null);
+        
+        TextView tvDate = dialogView.findViewById(R.id.tvDate);
+        TextView tvTime = dialogView.findViewById(R.id.tvTime);
+        EditText etNote = dialogView.findViewById(R.id.etNote);
+        
+        // Date picker
+        tvDate.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            DatePickerDialog datePicker = new DatePickerDialog(this,
+                (view, year, month, dayOfMonth) -> {
+                    Calendar selectedCal = Calendar.getInstance();
+                    selectedCal.set(year, month, dayOfMonth);
+                    selectedDate = selectedCal.getTimeInMillis();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    tvDate.setText(sdf.format(new Date(selectedDate)));
+                },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH));
+            datePicker.getDatePicker().setMinDate(System.currentTimeMillis());
+            datePicker.show();
+        });
+        
+        // Time picker
+        tvTime.setOnClickListener(v -> {
+            Calendar cal = Calendar.getInstance();
+            TimePickerDialog timePicker = new TimePickerDialog(this,
+                (view, hourOfDay, minute) -> {
+                    selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
+                    tvTime.setText(selectedTime);
+                },
+                cal.get(Calendar.HOUR_OF_DAY),
+                cal.get(Calendar.MINUTE),
+                true);
+            timePicker.show();
+        });
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Đặt lịch hẹn xem phòng")
+            .setView(dialogView)
+            .setPositiveButton("Đặt lịch", (dialog, which) -> {
+                if (selectedDate == 0) {
+                    Toast.makeText(this, "Vui lòng chọn ngày", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (selectedTime.isEmpty()) {
+                    Toast.makeText(this, "Vui lòng chọn giờ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                String note = etNote.getText().toString().trim();
+                createAppointment(note);
+            })
+            .setNegativeButton("Hủy", null)
+            .show();
+    }
+    
+    /**
+     * Tạo lịch hẹn và gửi thông báo cho chủ trọ
+     */
+    private void createAppointment(String note) {
+        showLoading(true);
+        
+        Appointment appointment = new Appointment();
+        appointment.setRoomId(currentRoom.getId());
+        appointment.setRoomTitle(currentRoom.getTitle());
+        appointment.setRoomThumbnail(currentRoom.getImageUrls() != null && !currentRoom.getImageUrls().isEmpty() 
+            ? currentRoom.getImageUrls().get(0) : null);
+        appointment.setOwnerId(currentRoom.getOwnerId());
+        appointment.setOwnerName(currentRoom.getOwnerName());
+        appointment.setRequesterId(currentUserId);
+        appointment.setRequesterName(currentUserName);
+        appointment.setRequesterPhone(currentUserPhone);
+        appointment.setAppointmentDate(selectedDate);
+        appointment.setAppointmentTime(selectedTime);
+        appointment.setNote(note);
+        appointment.setStatus(Appointment.STATUS_PENDING);
+        appointment.setCreatedAt(System.currentTimeMillis());
+        
+        firebaseManager.getFirestore()
+            .collection("appointments")
+            .add(appointment)
+            .addOnSuccessListener(docRef -> {
+                String appointmentId = docRef.getId();
+                
+                // Gửi thông báo cho chủ trọ
+                sendNotificationToOwner(appointmentId);
+                
+                showLoading(false);
+                Toast.makeText(this, "Đã gửi yêu cầu đặt lịch hẹn", Toast.LENGTH_SHORT).show();
+                
+                // Reset
+                selectedDate = 0;
+                selectedTime = "";
+            })
+            .addOnFailureListener(e -> {
+                showLoading(false);
+                Log.e(TAG, "Error creating appointment: " + e.getMessage());
+                Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+    }
+    
+    /**
+     * Gửi thông báo cho chủ trọ
+     */
+    private void sendNotificationToOwner(String appointmentId) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        
+        Notification notification = new Notification.Builder()
+            .userId(currentRoom.getOwnerId())
+            .senderId(currentUserId)
+            .senderName(currentUserName)
+            .type(Notification.TYPE_APPOINTMENT_REQUEST)
+            .title("Yêu cầu đặt lịch hẹn mới")
+            .message(currentUserName + " muốn xem phòng \"" + currentRoom.getTitle() + "\" vào ngày " 
+                + dateFormat.format(new Date(selectedDate)) + " lúc " + selectedTime)
+            .roomId(currentRoom.getId())
+            .roomTitle(currentRoom.getTitle())
+            .appointmentId(appointmentId)
+            .build();
+        
+        firebaseManager.getFirestore()
+            .collection("notifications")
+            .add(notification)
+            .addOnSuccessListener(docRef -> Log.d(TAG, "Notification sent to owner"))
+            .addOnFailureListener(e -> Log.e(TAG, "Error sending notification: " + e.getMessage()));
     }
 
     /**

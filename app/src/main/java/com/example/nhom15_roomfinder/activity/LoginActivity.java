@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
 
     // UI Components
     private EditText etEmail, etPassword;
-    private Button btnLogin, btnGoogleLogin, btnFacebookLogin;
+    private Button btnLogin, btnGoogleLogin;
     private Button btnLoginTab, btnRegisterTab;
     private TextView tvForgotPassword;
     private ImageView ivTogglePassword;
@@ -53,7 +53,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // Check if user is already logged in
         if (firebaseManager.isUserLoggedIn()) {
-            navigateToHome();
+            // Kiểm tra tài khoản có bị khóa không
+            checkExistingUserStatus();
             return;
         }
 
@@ -63,13 +64,55 @@ public class LoginActivity extends AppCompatActivity {
         // Set Listeners
         setListeners();
     }
+    
+    /**
+     * Kiểm tra trạng thái tài khoản khi user đã đăng nhập sẵn
+     */
+    private void checkExistingUserStatus() {
+        String userId = firebaseManager.getUserId();
+        if (userId == null) {
+            // Không có userId - cho qua
+            navigateToHome();
+            return;
+        }
+        
+        firebaseManager.getFirestore()
+            .collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Boolean isBlocked = documentSnapshot.getBoolean("isBlocked");
+                    
+                    if (isBlocked != null && isBlocked) {
+                        // Tài khoản bị khóa - đăng xuất
+                        firebaseManager.signOut();
+                        Toast.makeText(this, 
+                            "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.", 
+                            Toast.LENGTH_LONG).show();
+                        
+                        // Hiển thị lại màn hình login
+                        initializeViews();
+                        setListeners();
+                    } else {
+                        navigateToHome();
+                    }
+                } else {
+                    navigateToHome();
+                }
+            })
+            .addOnFailureListener(e -> {
+                // Lỗi - vẫn cho vào app
+                navigateToHome();
+            });
+    }
 
     private void initializeViews() {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         btnGoogleLogin = findViewById(R.id.btnGoogleLogin);
-        btnFacebookLogin = findViewById(R.id.btnFacebookLogin);
+
         btnLoginTab = findViewById(R.id.btnLoginTab);
         btnRegisterTab = findViewById(R.id.btnRegisterTab);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
@@ -81,7 +124,6 @@ public class LoginActivity extends AppCompatActivity {
         btnRegisterTab.setOnClickListener(v -> navigateToRegister());
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
         btnGoogleLogin.setOnClickListener(v -> signInWithGoogle());
-        btnFacebookLogin.setOnClickListener(v -> signInWithFacebook());
         ivTogglePassword.setOnClickListener(v -> togglePasswordVisibility());
     }
 
@@ -117,15 +159,15 @@ public class LoginActivity extends AppCompatActivity {
 
         // Sign in with Firebase
         firebaseManager.signInUser(email, password, task -> {
-            showLoading(false);
-
             if (task.isSuccessful()) {
-                // Login successful
+                // Login successful - kiểm tra tài khoản có bị khóa không
                 FirebaseUser user = firebaseManager.getCurrentUser();
-                Log.d(TAG, "Login successful: " + user.getUid());
-                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                navigateToHome();
+                Log.d(TAG, "Firebase Auth successful: " + user.getUid());
+                
+                // Kiểm tra trạng thái khóa trong Firestore
+                checkAccountStatus(user.getUid());
             } else {
+                showLoading(false);
                 // Login failed
                 String error = task.getException() != null ?
                         task.getException().getMessage() : "Đăng nhập thất bại";
@@ -133,6 +175,50 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Lỗi: " + error, Toast.LENGTH_LONG).show();
             }
         });
+    }
+    
+    /**
+     * Kiểm tra trạng thái tài khoản (có bị khóa không)
+     */
+    private void checkAccountStatus(String userId) {
+        firebaseManager.getFirestore()
+            .collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                showLoading(false);
+                
+                if (documentSnapshot.exists()) {
+                    // Kiểm tra field isBlocked
+                    Boolean isBlocked = documentSnapshot.getBoolean("isBlocked");
+                    
+                    if (isBlocked != null && isBlocked) {
+                        // Tài khoản bị khóa - đăng xuất và thông báo
+                        firebaseManager.signOut();
+                        Toast.makeText(this, 
+                            "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.", 
+                            Toast.LENGTH_LONG).show();
+                        Log.w(TAG, "Blocked account attempted to login: " + userId);
+                    } else {
+                        // Tài khoản bình thường - cho phép đăng nhập
+                        Log.d(TAG, "Login successful: " + userId);
+                        Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                        navigateToHome();
+                    }
+                } else {
+                    // Document không tồn tại - cho phép đăng nhập (user mới)
+                    Log.d(TAG, "New user login: " + userId);
+                    Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    navigateToHome();
+                }
+            })
+            .addOnFailureListener(e -> {
+                showLoading(false);
+                // Lỗi kết nối - vẫn cho đăng nhập nhưng log warning
+                Log.w(TAG, "Could not check account status: " + e.getMessage());
+                Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                navigateToHome();
+            });
     }
 
     /**
@@ -172,7 +258,7 @@ public class LoginActivity extends AppCompatActivity {
     private void showLoading(boolean isLoading) {
         btnLogin.setEnabled(!isLoading);
         btnGoogleLogin.setEnabled(!isLoading);
-        btnFacebookLogin.setEnabled(!isLoading);
+
         etEmail.setEnabled(!isLoading);
         etPassword.setEnabled(!isLoading);
 
@@ -261,11 +347,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(FirebaseUser user) {
                 Log.d(TAG, "Google Sign-In successful: " + user.getUid());
-                String displayName = user.getDisplayName() != null ? user.getDisplayName() : "User";
-                Toast.makeText(LoginActivity.this, 
-                    "Chào mừng " + displayName + "!", 
-                    Toast.LENGTH_SHORT).show();
-                navigateToHome();
+                // Kiểm tra trạng thái tài khoản trước khi cho phép đăng nhập
+                checkAccountStatusForGoogle(user);
             }
 
             @Override
@@ -281,6 +364,52 @@ public class LoginActivity extends AppCompatActivity {
                 showLoading(isLoading);
             }
         });
+    }
+    
+    /**
+     * Kiểm tra trạng thái tài khoản cho Google Sign-In
+     */
+    private void checkAccountStatusForGoogle(FirebaseUser user) {
+        firebaseManager.getFirestore()
+            .collection("users")
+            .document(user.getUid())
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                showLoading(false);
+                
+                if (documentSnapshot.exists()) {
+                    Boolean isBlocked = documentSnapshot.getBoolean("isBlocked");
+                    
+                    if (isBlocked != null && isBlocked) {
+                        // Tài khoản bị khóa - đăng xuất
+                        firebaseManager.signOut();
+                        if (googleSignInHelper != null) {
+                            googleSignInHelper.signOut();
+                        }
+                        Toast.makeText(this, 
+                            "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.", 
+                            Toast.LENGTH_LONG).show();
+                        Log.w(TAG, "Blocked Google account attempted to login: " + user.getUid());
+                    } else {
+                        // Cho phép đăng nhập
+                        String displayName = user.getDisplayName() != null ? user.getDisplayName() : "User";
+                        Toast.makeText(this, "Chào mừng " + displayName + "!", Toast.LENGTH_SHORT).show();
+                        navigateToHome();
+                    }
+                } else {
+                    // User mới - cho phép đăng nhập
+                    String displayName = user.getDisplayName() != null ? user.getDisplayName() : "User";
+                    Toast.makeText(this, "Chào mừng " + displayName + "!", Toast.LENGTH_SHORT).show();
+                    navigateToHome();
+                }
+            })
+            .addOnFailureListener(e -> {
+                showLoading(false);
+                // Lỗi - vẫn cho đăng nhập
+                String displayName = user.getDisplayName() != null ? user.getDisplayName() : "User";
+                Toast.makeText(this, "Chào mừng " + displayName + "!", Toast.LENGTH_SHORT).show();
+                navigateToHome();
+            });
     }
 
     /**
@@ -318,13 +447,5 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Đăng nhập với Facebook
-     */
-    private void signInWithFacebook() {
-        Toast.makeText(this,
-                "Tính năng đăng nhập Facebook sẽ được triển khai sau",
-                Toast.LENGTH_SHORT).show();
-        // TODO: Implement Facebook Sign-In
-    }
+
 }

@@ -172,11 +172,20 @@ public class ChatListActivity extends AppCompatActivity {
             }
         }
         
-        // Lấy thông tin từ recipientInfo
-        DataSnapshot recipientInfo = snapshot.child("recipientInfo").child(currentUserId);
-        if (recipientInfo.exists()) {
-            chat.setRecipientName(recipientInfo.child("name").getValue(String.class));
-            chat.setRecipientAvatar(recipientInfo.child("avatar").getValue(String.class));
+        // Lấy thông tin từ recipientInfo - Lấy tên của người còn lại (không phải mình)
+        String recipientId = chat.getRecipientId();
+        DataSnapshot recipientInfoSnapshot = snapshot.child("recipientInfo").child(recipientId);
+        if (recipientInfoSnapshot.exists()) {
+            String name = recipientInfoSnapshot.child("name").getValue(String.class);
+            String avatar = recipientInfoSnapshot.child("avatar").getValue(String.class);
+            chat.setRecipientName(name);
+            chat.setRecipientAvatar(avatar);
+        }
+        
+        // Nếu không có tên, load từ Firestore
+        if (chat.getRecipientName() == null || chat.getRecipientName().isEmpty() 
+                || "You".equals(chat.getRecipientName()) || "User".equals(chat.getRecipientName())) {
+            loadRecipientNameFromFirestore(chat);
         }
         
         // Lấy tin nhắn cuối
@@ -193,6 +202,32 @@ public class ChatListActivity extends AppCompatActivity {
         chat.setRoomTitle(snapshot.child("roomTitle").getValue(String.class));
         
         return chat;
+    }
+
+    /**
+     * Load tên người nhận từ Firestore users collection
+     */
+    private void loadRecipientNameFromFirestore(Chat chat) {
+        if (chat.getRecipientId() == null) return;
+        
+        firebaseManager.getFirestore()
+            .collection("users")
+            .document(chat.getRecipientId())
+            .get()
+            .addOnSuccessListener(doc -> {
+                if (doc.exists()) {
+                    String name = doc.getString("name");
+                    if (name == null || name.isEmpty()) {
+                        name = doc.getString("email");
+                    }
+                    String avatar = doc.getString("photoUrl");
+                    
+                    chat.setRecipientName(name);
+                    chat.setRecipientAvatar(avatar);
+                    chatAdapter.notifyDataSetChanged();
+                }
+            })
+            .addOnFailureListener(e -> Log.e(TAG, "Error loading recipient: " + e.getMessage()));
     }
 
     private void showLoading(boolean show) {

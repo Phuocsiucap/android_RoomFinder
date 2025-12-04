@@ -192,6 +192,19 @@
             android:background="@drawable/button_outlined"
             android:layout_marginBottom="12dp" />
 
+        <!-- My Posts Button -->
+        <Button
+            android:id="@+id/btnMyPosts"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Bài đăng của tôi"
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp"
+            android:background="@drawable/button_outlined"
+            android:drawableStart="@drawable/ic_home"
+            android:drawablePadding="8dp"
+            android:layout_marginBottom="12dp" />
+
         <!-- Admin Dashboard Button (only visible for admin users) -->
         <Button
             android:id="@+id/btnAdminDashboard"

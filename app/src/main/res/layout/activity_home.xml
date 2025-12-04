@@ -56,6 +56,19 @@
                     android:textColor="@android:color/black"
                     android:paddingStart="8dp" />
 
+                <!-- Post Room Button -->
+                <Button
+                    android:id="@+id/btnPostRoom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="+ Đăng tin"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="12dp"
+                    android:background="@drawable/button_primary"
+                    android:layout_marginEnd="12dp" />
+
                 <!-- Notification Icon -->
                 <ImageView
                     android:id="@+id/imgNotification"
@@ -261,6 +274,100 @@
 
             </LinearLayout>
 
+            <!-- Filter Tags - Horizontal Scroll -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Giá rẻ -->
+                    <TextView
+                        android:id="@+id/filterCheap"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="💰 Giá rẻ"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_tag_unselected"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- Có điều hòa -->
+                    <TextView
+                        android:id="@+id/filterAC"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="❄️ Điều hòa"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_tag_unselected"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- Có WiFi -->
+                    <TextView
+                        android:id="@+id/filterWifi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="📶 WiFi"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_tag_unselected"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- Có chỗ để xe -->
+                    <TextView
+                        android:id="@+id/filterParking"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="🅿️ Để xe"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_tag_unselected"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- Gần trường -->
+                    <TextView
+                        android:id="@+id/filterNearSchool"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="🏫 Gần trường"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_tag_unselected"
+                        android:layout_marginEnd="8dp" />
+
+                    <!-- Phòng rộng -->
+                    <TextView
+                        android:id="@+id/filterSpacious"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center"
+                        android:text="🏠 Phòng rộng"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_primary"
+                        android:background="@drawable/bg_tag_unselected" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
             <!-- Phòng mới bật hôm nay -->
             <TextView
                 android:layout_width="wrap_content"
@@ -320,38 +427,6 @@
                 android:layout_marginBottom="24dp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="16dp"
-                android:padding="16dp"
-                android:background="@drawable/banner_background"
-                android:orientation="vertical"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bạn có phòng trống? Đăng tin ngay để tìm người thuê!"
-                    android:textColor="@color/colorPrimary"
-                    android:textSize="14sp"
-                    android:gravity="center"
-                    android:layout_marginBottom="12dp" />
-
-                <Button
-                    android:id="@+id/btnPostRoom"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:text="Đăng tin"
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:paddingHorizontal="24dp"
-                    android:background="@drawable/button_primary" />
-
-            </LinearLayout>
 
         </LinearLayout>
         
