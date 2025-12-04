@@ -9,16 +9,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.google.android.material.slider.RangeSlider;
-
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import java.util.Set;
+import java.util.HashSet;
 import com.example.nhom15_roomfinder.R;
 import com.example.nhom15_roomfinder.entity.Room;
 // Sửa lại import này để nhất quán
@@ -31,6 +35,19 @@ import com.mapbox.geojson.Point;
 import com.mapbox.maps.CameraOptions;
 import com.mapbox.maps.MapView;
 import com.mapbox.maps.Style;
+import com.mapbox.maps.ImageHolder;
+
+import androidx.annotation.NonNull;
+
+import com.mapbox.maps.plugin.Plugin;
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
+import com.mapbox.maps.plugin.LocationPuck2D;
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
+
+
+
+
+
 import android.widget.TextView;
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -40,7 +57,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class SearchResulActivity extends AppCompatActivity {
-
+    private OnIndicatorPositionChangedListener locationListener;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
     private static final String TAG = "SearchResulActivity";
 
     // --- Views chính ---
@@ -91,7 +109,20 @@ public class SearchResulActivity extends AppCompatActivity {
         firestore = FirebaseFirestore.getInstance();
 
         // 4. Thiết lập MapView
-        setupMapView();
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE
+            );
+
+        } else {
+            // ✅ Đã có quyền thì mới cho chạy Mapbox
+            setupMapView();
+        }
 
         // 5. Thiết lập các listener (bao gồm cả các nút sắp xếp)
         setupListeners();
@@ -154,7 +185,7 @@ public class SearchResulActivity extends AppCompatActivity {
     }
 
 
-    private void setupMapView() {
+    /*private void setupMapView() {
         mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
             // Thiết lập vị trí mặc định (ví dụ: Hà Nội)
             double lat = 21.0278;
@@ -164,7 +195,56 @@ public class SearchResulActivity extends AppCompatActivity {
                     .zoom(12.0)
                     .build());
         });
+    }*/
+    private void setupMapView() {
+        mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
+
+            LocationComponentPlugin locationPlugin =
+                    mapView.getPlugin(Plugin.MAPBOX_LOCATION_COMPONENT_PLUGIN_ID);
+
+            if (locationPlugin == null) {
+                Log.e(TAG, "Location plugin is NULL");
+                return;
+            }
+
+            // ✅ BẬT GPS + CHẤM XANH
+            locationPlugin.updateSettings(settings -> {
+                settings.setEnabled(true);
+                settings.setPulsingEnabled(true);
+                LocationPuck2D puck = new LocationPuck2D(
+                        ImageHolder.from(R.drawable.mapbox_user_icon),
+                        ImageHolder.from(R.drawable.mapbox_user_stroke_icon),
+                        null
+                );
+
+                return null;
+            });
+
+            // ✅ TẠO LISTENER
+            locationListener = point -> {
+
+                double lat = point.latitude();
+                double lng = point.longitude();
+
+                mapView.getMapboxMap().setCamera(
+                        new CameraOptions.Builder()
+                                .center(Point.fromLngLat(lng, lat))
+                                .zoom(14.0)
+                                .build()
+                );
+
+                // ✅ GỠ LISTENER SAU KHI LẤY 1 LẦN
+                locationPlugin.removeOnIndicatorPositionChangedListener(locationListener);
+            };
+
+            // ✅ ĐĂNG KÝ LISTENER
+            locationPlugin.addOnIndicatorPositionChangedListener(locationListener);
+        });
     }
+
+
+
+
 
     private void setupListeners() {
         drawerLayout.setScrimColor(0x99000000);
@@ -176,6 +256,53 @@ public class SearchResulActivity extends AppCompatActivity {
         });
 
         NavigationView navigationView = findViewById(R.id.filter_navigation_view);
+        // ======================
+// 1. LẤY CÁC BUTTON FILTER
+        Button btnHanoi = navigationView.findViewById(R.id.Hanoi);
+        Button btnHcm = navigationView.findViewById(R.id.Hcm);
+        Button btnHaiphong = navigationView.findViewById(R.id.Haiphong);
+        Button btnDannang = navigationView.findViewById(R.id.Dannang);
+        Button btnHue = navigationView.findViewById(R.id.Hue);
+// Nếu muốn: Button btnKhac = navigationView.findViewById(R.id.Khac);
+
+        Button btnS20 = navigationView.findViewById(R.id.s20);
+        Button btnS2050 = navigationView.findViewById(R.id.s2050);
+        Button btnS50100 = navigationView.findViewById(R.id.s50100);
+        Button btnS100200 = navigationView.findViewById(R.id.s100200);
+        Button btnS200 = navigationView.findViewById(R.id.s200);
+
+        Button btnWifi = navigationView.findViewById(R.id.wifi);
+        Button btnDieuhoa = navigationView.findViewById(R.id.dieuhoa);
+        Button btnDexe = navigationView.findViewById(R.id.dexe);
+        Button btnPhongtam = navigationView.findViewById(R.id.phongtam);
+        Button btnBep = navigationView.findViewById(R.id.bep);
+        Button btnBaove = navigationView.findViewById(R.id.baove);
+
+// ======================
+// 2. TẠO LISTENER CHUNG ĐỂ TOGGLE TRẠNG THÁI SELECTED
+        View.OnClickListener toggleSelectedListener = v -> v.setSelected(!v.isSelected());
+
+// ======================
+// 3. ÁP DỤNG CHO TẤT CẢ BUTTON
+        btnHanoi.setOnClickListener(toggleSelectedListener);
+        btnHcm.setOnClickListener(toggleSelectedListener);
+        btnHaiphong.setOnClickListener(toggleSelectedListener);
+        btnDannang.setOnClickListener(toggleSelectedListener);
+        btnHue.setOnClickListener(toggleSelectedListener);
+// btnKhac.setOnClickListener(toggleSelectedListener); // nếu dùng
+
+        btnS20.setOnClickListener(toggleSelectedListener);
+        btnS2050.setOnClickListener(toggleSelectedListener);
+        btnS50100.setOnClickListener(toggleSelectedListener);
+        btnS100200.setOnClickListener(toggleSelectedListener);
+        btnS200.setOnClickListener(toggleSelectedListener);
+
+        btnWifi.setOnClickListener(toggleSelectedListener);
+        btnDieuhoa.setOnClickListener(toggleSelectedListener);
+        btnDexe.setOnClickListener(toggleSelectedListener);
+        btnPhongtam.setOnClickListener(toggleSelectedListener);
+        btnBep.setOnClickListener(toggleSelectedListener);
+        btnBaove.setOnClickListener(toggleSelectedListener);
 
         Button btnCancel  = navigationView.findViewById(R.id.button_cancel);
         Button btnApprove = navigationView.findViewById(R.id.button_approve);
@@ -186,10 +313,60 @@ public class SearchResulActivity extends AppCompatActivity {
 
         if (btnApprove != null) {
             btnApprove.setOnClickListener(v -> {
-                Toast.makeText(this, "Áp dụng bộ lọc!", Toast.LENGTH_SHORT).show();
+                // 1. Lấy giá trị từ RangeSlider
+                RangeSlider priceSlider = navigationView.findViewById(R.id.priceRangeSlider);
+                float minPrice = 0f, maxPrice = Float.MAX_VALUE;
+                if (priceSlider != null) {
+                    minPrice = priceSlider.getValues().get(0);
+                    maxPrice = priceSlider.getValues().get(1);
+                }
+
+                // 2. Lấy thành phố đã chọn
+                Set<String> selectedCities = new HashSet<>();
+                if (navigationView.findViewById(R.id.Hanoi).isSelected()) selectedCities.add("Hà Nội");
+                if (navigationView.findViewById(R.id.Hcm).isSelected()) selectedCities.add("H.C.Minh");
+                if (navigationView.findViewById(R.id.Haiphong).isSelected()) selectedCities.add("Hải Phòng");
+                if (navigationView.findViewById(R.id.Dannang).isSelected()) selectedCities.add("Đà Nẵng");
+                if (navigationView.findViewById(R.id.Hue).isSelected()) selectedCities.add("Huế");
+                if (navigationView.findViewById(R.id.Khac).isSelected()) selectedCities.add("Khác");
+
+                // 3. Lấy diện tích đã chọn
+                double minArea = 0, maxArea = Double.MAX_VALUE;
+                if (navigationView.findViewById(R.id.s20).isSelected()) { minArea = 0; maxArea = 20; }
+                if (navigationView.findViewById(R.id.s2050).isSelected()) { minArea = 20; maxArea = 50; }
+                if (navigationView.findViewById(R.id.s50100).isSelected()) { minArea = 50; maxArea = 100; }
+                if (navigationView.findViewById(R.id.s100200).isSelected()) { minArea = 100; maxArea = 200; }
+                if (navigationView.findViewById(R.id.s200).isSelected()) { minArea = 200; maxArea = Double.MAX_VALUE; }
+
+                // 4. Lấy tiện ích đã chọn (multi-selection)
+                Set<String> selectedAmenities = new HashSet<>();
+                if (navigationView.findViewById(R.id.wifi).isSelected()) selectedAmenities.add("wifi");
+                if (navigationView.findViewById(R.id.dieuhoa).isSelected()) selectedAmenities.add("ac");
+                if (navigationView.findViewById(R.id.dexe).isSelected()) selectedAmenities.add("parking");
+                if (navigationView.findViewById(R.id.phongtam).isSelected()) selectedAmenities.add("bathroom");
+                if (navigationView.findViewById(R.id.bep).isSelected()) selectedAmenities.add("kitchen");
+                if (navigationView.findViewById(R.id.baove).isSelected()) selectedAmenities.add("security");
+
+                // 5. Gọi hàm lọc
+                displayedRoomList.clear();
+                displayedRoomList.addAll(
+                        filterRooms(allRoomsList,
+                                minPrice, maxPrice,
+                                selectedCities,
+                                minArea, maxArea,
+                                selectedAmenities)
+                );
+
+                // 6. Cập nhật RecyclerView
+                roomAdapter.notifyDataSetChanged();
+
+                // 7. Đóng drawer
                 closeDrawer();
+
+                Toast.makeText(this, "Bộ lọc đã được áp dụng!", Toast.LENGTH_SHORT).show();
             });
         }
+
 
         // ----- SORT BUTTONS -----
         btnSortNearest.setOnClickListener(v -> {
@@ -398,7 +575,7 @@ public class SearchResulActivity extends AppCompatActivity {
             updatePriceText(min, max, priceRangeText);
         });
     }
-    //ok
+
 
 
     private void updatePriceText(float min, float max, TextView textView) {
@@ -406,4 +583,88 @@ public class SearchResulActivity extends AppCompatActivity {
         String maxStr = String.format("%,.0f", max).replace(",", ".");
         textView.setText(minStr + " VNĐ        " + maxStr + " VNĐ");
     }
+    public static List<Room> filterRooms(List<Room> rooms,
+                                         double minPrice, double maxPrice,
+                                         Set<String> selectedCities,
+                                         double minArea, double maxArea,
+                                         Set<String> selectedAmenities) {
+        List<Room> result = new ArrayList<>();
+
+        for (Room room : rooms) {
+            // Lọc theo giá
+            if (room.getPrice() < minPrice || room.getPrice() > maxPrice) {
+                continue;
+            }
+
+            // Lọc theo thành phố (nếu có chọn)
+            if (selectedCities != null && !selectedCities.isEmpty() &&
+                    !selectedCities.contains(room.getCity())) {
+                continue;
+            }
+
+            // Lọc theo diện tích
+            if (room.getArea() < minArea || room.getArea() > maxArea) {
+                continue;
+            }
+
+            // Lọc theo tiện ích (multi-selection)
+            boolean amenityMatch = true;
+            if (selectedAmenities != null && !selectedAmenities.isEmpty()) {
+                for (String amenity : selectedAmenities) {
+                    switch (amenity.toLowerCase()) {
+                        case "wifi":
+                            if (!room.isHasWifi()) amenityMatch = false;
+                            break;
+                        case "ac":
+                            if (!room.isHasAC()) amenityMatch = false;
+                            break;
+                        case "parking":
+                            if (!room.isHasParking()) amenityMatch = false;
+                            break;
+                        case "bathroom":
+                            if (!room.isHasPrivateBathroom()) amenityMatch = false;
+                            break;
+                        case "kitchen":
+                            if (!room.isHasKitchen()) amenityMatch = false;
+                            break;
+                        case "security":
+                            if (!room.isHasSecurity()) amenityMatch = false;
+                            break;
+                    }
+                    if (!amenityMatch) break; // đã không hợp lệ, bỏ qua phòng này
+                }
+            }
+
+            if (!amenityMatch) continue;
+
+            // Nếu tất cả điều kiện thỏa, thêm phòng vào kết quả
+            result.add(room);
+        }
+
+        return result;
+    }
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // ✅ Người dùng đã cho phép GPS → bật Mapbox
+                setupMapView();
+
+            } else {
+                Toast.makeText(this,
+                        "Bạn cần bật GPS để sử dụng bản đồ",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    //OK
 }

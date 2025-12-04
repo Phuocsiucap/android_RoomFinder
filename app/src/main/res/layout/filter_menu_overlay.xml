@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="1dp"
                 android:gravity="end"
-                android:text="0                                                                 100.000.000"
+                android:text="0                                                                       100.000.000"
                 android:textSize="12sp" />
 
             <View
@@ -91,7 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="thể loại"
+                android:text="thành phố"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -107,39 +107,61 @@
                     android:orientation="horizontal">
 
                     <Button
+
+                        android:id="@+id/Hanoi"
                         style="@style/FilterButton3Cols"
-                        android:text="mặt bằng kinh doanh" />
+                        android:text="Hà Nội"
+                        android:textColor="@color/button_text_selector"
+                        android:background="@drawable/tab_selected"
+                        />
 
                     <Button
+                        android:id="@+id/Hcm"
                         style="@style/FilterButton3Cols"
-                        android:text="nhà trọ" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="H.C.Minh" />
 
                     <Button
+                        android:id="@+id/Haiphong"
                         style="@style/FilterButton3Cols"
-                        android:text="giá rẻ" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Hải Phòng" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/Dannang"
                         style="@style/FilterButton3Cols"
-                        android:text="cao cấp" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Đà Nẵng" />
 
                     <Button
+                        android:id="@+id/Hue"
                         style="@style/FilterButton3Cols"
-                        android:text="chung cư" />
-
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Huế" />
                     <Button
+                        android:id="@+id/Khac"
                         style="@style/FilterButton3Cols"
-                        android:text="nhà lầu" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Khác" />
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/tab_selected"
                     android:orientation="horizontal">
 
 
@@ -147,6 +169,7 @@
                     <View
                         android:layout_width="0dp"
                         android:layout_height="1dp"
+
                         android:layout_weight="2" />
                 </LinearLayout>
             </LinearLayout>
@@ -177,15 +200,24 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/s20"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="&lt;20m2" />
 
                     <Button
+                        android:id="@+id/s2050"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="20-50m2" />
 
                     <Button
+                        android:id="@+id/s50100"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="50-100m2" />
                 </LinearLayout>
 
@@ -195,11 +227,17 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/s100200"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="100-200m2" />
 
                     <Button
+                        android:id="@+id/s200"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="&gt;200m2" />
 
                     <View
@@ -235,15 +273,24 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/baove"
                         style="@style/FilterButton3Cols"
-                        android:text="khép kín" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Bảo vệ" />
 
                     <Button
+                        android:id="@+id/dexe"
                         style="@style/FilterButton3Cols"
-                        android:text="sân vườn" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="chỗ để xe" />
 
                     <Button
+                        android:id="@+id/bep"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="phòng bếp" />
                 </LinearLayout>
 
@@ -253,15 +300,24 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/wifi"
                         style="@style/FilterButton3Cols"
-                        android:text="máy giặt" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Wifi" />
 
                     <Button
+                        android:id="@+id/phongtam"
                         style="@style/FilterButton3Cols"
-                        android:text="tủ lạnh" />
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Phòng tắm" />
 
                     <Button
+                        android:id="@+id/dieuhoa"
                         style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
                         android:text="điều hòa" />
                 </LinearLayout>
 

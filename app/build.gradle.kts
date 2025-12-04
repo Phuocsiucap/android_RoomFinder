@@ -15,6 +15,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPBOX_ACCESS_TOKEN"] =
+            project.properties["MAPBOX_DOWNLOADS_TOKEN"]?.toString() ?: ""
     }
 
     buildTypes {
@@ -66,5 +68,8 @@ dependencies {
     
     // SwipeRefreshLayout
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    //mapbox
     implementation("com.mapbox.maps:android:11.16.6")
+
+
 }
