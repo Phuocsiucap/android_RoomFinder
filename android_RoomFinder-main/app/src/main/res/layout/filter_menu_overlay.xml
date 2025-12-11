@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ScrollView
+        android:id="@+id/filterScrollView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toTopOf="@id/bottom_action_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Toàn bộ nội dung các bộ lọc của bạn được giữ nguyên -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="lọc phòng trọ"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:contentDescription="Filter Icon"
+                    android:src="@drawable/filter"
+                    app:tint="@android:color/black" />
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="giá"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/priceRangeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:gravity="end"
+                android:text="5.000.000 VNĐ                               40.000.000 VNĐ"
+                tools:ignore="RtlHardcoded" />
+
+            <com.google.android.material.slider.RangeSlider
+                android:id="@+id/priceRangeSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+
+
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="1dp"
+                android:gravity="end"
+                android:text="0                                                                       100.000.000"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="16dp"
+                android:background="#EEEEEE" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="thành phố"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+
+                        android:id="@+id/Hanoi"
+                        style="@style/FilterButton3Cols"
+                        android:text="Hà Nội"
+                        android:textColor="@color/button_text_selector"
+                        android:background="@drawable/tab_selected"
+                        />
+
+                    <Button
+                        android:id="@+id/Hcm"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="H.C.Minh" />
+
+                    <Button
+                        android:id="@+id/Haiphong"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Hải Phòng" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/Dannang"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Đà Nẵng" />
+
+                    <Button
+                        android:id="@+id/Hue"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Huế" />
+                    <Button
+                        android:id="@+id/Khac"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Khác" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tab_selected"
+                    android:orientation="horizontal">
+
+
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+
+                        android:layout_weight="2" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="16dp"
+                android:background="#EEEEEE" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="diện tích"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/s20"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="&lt;20m2" />
+
+                    <Button
+                        android:id="@+id/s2050"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="20-50m2" />
+
+                    <Button
+                        android:id="@+id/s50100"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="50-100m2" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/s100200"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="100-200m2" />
+
+                    <Button
+                        android:id="@+id/s200"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="&gt;200m2" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="16dp"
+                android:background="#EEEEEE" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="tiện ích"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/baove"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Bảo vệ" />
+
+                    <Button
+                        android:id="@+id/dexe"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="chỗ để xe" />
+
+                    <Button
+                        android:id="@+id/bep"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="phòng bếp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/wifi"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Wifi" />
+
+                    <Button
+                        android:id="@+id/phongtam"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="Phòng tắm" />
+
+                    <Button
+                        android:id="@+id/dieuhoa"
+                        style="@style/FilterButton3Cols"
+                        android:background="@drawable/tab_selected"
+                        android:textColor="@color/button_text_selector"
+                        android:text="điều hòa" />
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottom_action_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <Button
+            android:id="@+id/button_cancel"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#E0E0E0"
+            android:text="hủy bỏ"
+            android:textColor="@android:color/black" />
+
+        <Button
+            android:id="@+id/button_approve"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#2196F3"
+            android:text="duyệt"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

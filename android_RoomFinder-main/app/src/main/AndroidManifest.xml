@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Internet permission for Firebase -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Camera and Storage permissions for image uploads -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Nhom15_RoomFinder"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".activity.HomeActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <meta-data
+                android:name="com.mapbox.accessToken"
+                android:value="${MAPBOX_ACCESS_TOKEN}" />
+        </activity>
+        <activity android:name=".activity.LoginActivity"/>
+        <activity android:name=".activity.RegisterActivity"/>
+        <activity android:name=".activity.ProfileActivity"/>
+        <activity android:name=".activity.BookingActivity"/>
+        <activity android:name=".activity.ChatListActivity"/>
+        <activity android:name=".activity.ChatDetailActivity"/>
+        <activity android:name=".activity.ImageGalleryActivity"/>
+        <activity android:name=".activity.PropertyDetailActivity"/>
+        <activity android:name=".activity.FavoriteActivity"/>
+        <activity android:name=".activity.SearchResulActivity"/>
+        <activity android:name=".activity.PostRoomActivity"/>
+        <activity android:name=".activity.EditPostActivity"/>
+        <activity android:name=".activity.ListingActivity"/>
+        <activity android:name=".activity.NotificationActivity"/>
+        <activity android:name=".activity.MyPostsActivity"/>
+        <activity android:name=".activity.EditRoomActivity"/>
+        <activity android:name=".activity.AppointmentDetailActivity"/>
+        <activity android:name=".activity.FilteredRoomsActivity"/>
+        <activity 
+            android:name=".activity.FullscreenImageActivity"
+            android:theme="@style/Theme.Nhom15_RoomFinder.Fullscreen"/>
+        <activity android:name=".AdminDashboardActivity"/>
+        <activity android:name=".UserListActivity"/>
+        <activity android:name=".ActivityListAds"/>
+        <activity android:name=".StatisticActivity"/>
+
+    </application>
+
+</manifest>

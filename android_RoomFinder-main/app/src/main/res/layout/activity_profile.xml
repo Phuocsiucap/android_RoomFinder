@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <!-- Nút Back (Mới) -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Back"
+        android:elevation="4dp" />
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Profile"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Profile Picture -->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <ImageView
+                android:id="@+id/imgProfilePicture"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+
+                android:scaleType="centerCrop"
+                android:contentDescription="Profile Picture" />
+
+            <ImageView
+                android:id="@+id/ivUploadIcon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignEnd="@id/imgProfilePicture"
+                android:layout_alignBottom="@id/imgProfilePicture"
+                android:src="@drawable/ic_camera"
+
+                android:padding="8dp"
+                android:contentDescription="Upload photo" />
+
+        </RelativeLayout>
+
+        <!-- Upload/Change Text -->
+        <TextView
+            android:id="@+id/tvUploadChange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload/Change"
+            android:textSize="14sp"
+            android:textColor="@color/colorPrimary"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Full Name Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Họ tên"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nguyễn Văn A"
+            android:inputType="textPersonName"
+            android:padding="16dp"
+            android:background="@drawable/edit_text_border"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Email Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="nguyenvana@example.com"
+            android:inputType="textEmailAddress"
+            android:padding="16dp"
+            android:background="@drawable/edit_text_border"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Phone Number Input -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Số điện thoại"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etPhoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="0901234567"
+            android:inputType="phone"
+            android:padding="16dp"
+            android:background="@drawable/edit_text_border"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Gender Dropdown -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Giới tính (optional)"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <Spinner
+            android:id="@+id/spinnerGender"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:padding="16dp"
+
+            android:layout_marginBottom="24dp" />
+
+        <!-- Save Changes Button -->
+        <Button
+            android:id="@+id/btnSaveChanges"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Lưu thay đổi"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_primary"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Change Password Button -->
+        <Button
+            android:id="@+id/btnChangePassword"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Đổi mật khẩu"
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp"
+            android:background="@drawable/button_outlined"
+            android:layout_marginBottom="12dp" />
+
+        <!-- My Posts Button -->
+        <Button
+            android:id="@+id/btnMyPosts"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Bài đăng của tôi"
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp"
+            android:background="@drawable/button_outlined"
+            android:drawableStart="@drawable/ic_home"
+            android:drawablePadding="8dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Admin Dashboard Button (only visible for admin users) -->
+        <Button
+            android:id="@+id/btnAdminDashboard"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Quản trị viên"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_primary"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
+        <!-- Logout Button -->
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Đăng xuất"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_danger" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>
