@@ -229,27 +229,44 @@ public class SearchResulActivity extends AppCompatActivity {
                         ImageHolder.from(R.drawable.mapbox_user_stroke_icon),
                         null
                 );
-
                 return null;
             });
 
-            // ✅ TẠO LISTENER
+
             locationListener = point -> {
+                double currentLat = point.latitude();
+                double currentLng = point.longitude();
 
-                double lat = point.latitude();
-                double lng = point.longitude();
-
+                // Cập nhật camera
                 mapView.getMapboxMap().setCamera(
                         new CameraOptions.Builder()
-                                .center(Point.fromLngLat(lng, lat))
+                                .center(Point.fromLngLat(currentLng, currentLat))
                                 .zoom(14.0)
                                 .build()
                 );
 
+
+                if (roomAdapter != null) {
+                    roomAdapter.setUserLocation(currentLat, currentLng);
+                }
+
+
                 locationPlugin.removeOnIndicatorPositionChangedListener(locationListener);
             };
+
             locationPlugin.addOnIndicatorPositionChangedListener(locationListener);
         });
+    }
+
+    private double calculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // bán kính Trái Đất (km)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // trả về km
     }
 
     private void setupListeners() {
@@ -483,13 +500,22 @@ public class SearchResulActivity extends AppCompatActivity {
                 Collections.sort(filteredList, Comparator.comparingDouble(Room::getPrice));
                 break;
             case NEWEST:
-                // Sắp xếp theo ngày đăng mới nhất (cần trường 'createdAt' trong Room)
-                // Collections.sort(filteredList, (o1, o2) -> o2.getCreatedAt().compareTo(o1.getCreatedAt()));
+
 
                 break;
             case NEAREST:
-
+                Double userLat = roomAdapter.getUserLat();
+                Double userLng = roomAdapter.getUserLng();
+                if (userLat != null && userLng != null) {
+                    Collections.sort(filteredList, (r1, r2) -> {
+                        double d1 = calculateDistanceKm(userLat, userLng, r1.getLatitude(), r1.getLongitude());
+                        double d2 = calculateDistanceKm(userLat, userLng, r2.getLatitude(), r2.getLongitude());
+                        return Double.compare(d1, d2);
+                    });
+                }
                 break;
+
+
             case RELEVANCE:
 
                 break;

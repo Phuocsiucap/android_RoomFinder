@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.nhom15_roomfinder.R;
-import com.example.nhom15_roomfinder.adapter.RoomAdapter;
+import com.example.nhom15_roomfinder.adapter.RoomSearchAdapter;
 import com.example.nhom15_roomfinder.entity.Room;
 import com.example.nhom15_roomfinder.firebase.FirebaseManager;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -23,9 +23,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * FilteredRoomsActivity - Hiển thị danh sách phòng đã lọc
- */
 public class FilteredRoomsActivity extends AppCompatActivity {
 
     private static final String TAG = "FilteredRoomsActivity";
@@ -39,10 +36,11 @@ public class FilteredRoomsActivity extends AppCompatActivity {
     private FirebaseManager firebaseManager;
     private List<Room> roomList = new ArrayList<>();
     private List<Room> allRooms = new ArrayList<>();
-    private RoomAdapter adapter;
+
+    private RoomSearchAdapter adapter;
 
     // Filter flags
-    private boolean filterCheap, filterAC, filterWifi, filterParking, filterNearSchool, filterSpacious;
+    private boolean filterCheap, filterAC, filterWifi, filterParking, filterNear, filterSpacious;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +62,7 @@ public class FilteredRoomsActivity extends AppCompatActivity {
         filterAC = intent.getBooleanExtra("filterAC", false);
         filterWifi = intent.getBooleanExtra("filterWifi", false);
         filterParking = intent.getBooleanExtra("filterParking", false);
-        filterNearSchool = intent.getBooleanExtra("filterNearSchool", false);
+        filterNear = intent.getBooleanExtra("filterNear", false);
         filterSpacious = intent.getBooleanExtra("filterSpacious", false);
     }
 
@@ -76,72 +74,23 @@ public class FilteredRoomsActivity extends AppCompatActivity {
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
         progressBar = findViewById(R.id.progressBar);
 
-        // Set title based on filters
         String title = getIntent().getStringExtra("title");
-        if (title != null && !title.isEmpty()) {
-            tvTitle.setText(title);
-        } else {
-            tvTitle.setText("Kết quả lọc");
-        }
+        tvTitle.setText(title != null ? title : "Kết quả lọc");
     }
 
     private void setupRecyclerView() {
-        adapter = new RoomAdapter(this, roomList, new RoomAdapter.OnRoomClickListener() {
-            @Override
-            public void onRoomClick(Room room) {
-                Intent intent = new Intent(FilteredRoomsActivity.this, PropertyDetailActivity.class);
-                intent.putExtra("room", room);
-                startActivity(intent);
-            }
-
-            @Override
-            public void onFavoriteClick(Room room, int position) {
-                toggleFavorite(room, position);
-            }
-        });
+        adapter = new RoomSearchAdapter(
+                this,
+                roomList,
+                room -> {
+                    Intent intent = new Intent(FilteredRoomsActivity.this, PropertyDetailActivity.class);
+                    intent.putExtra("room", room);
+                    startActivity(intent);
+                }
+        );
 
         rvRooms.setLayoutManager(new LinearLayoutManager(this));
         rvRooms.setAdapter(adapter);
-    }
-
-    private void toggleFavorite(Room room, int position) {
-        String currentUserId = firebaseManager.getUserId();
-        if (currentUserId == null) {
-            Toast.makeText(this, "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (room.isFavorite()) {
-            // Xóa khỏi yêu thích
-            firebaseManager.getFirestore()
-                .collection("favorites")
-                .whereEqualTo("userId", currentUserId)
-                .whereEqualTo("roomId", room.getId())
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        doc.getReference().delete();
-                    }
-                    room.setFavorite(false);
-                    adapter.notifyItemChanged(position);
-                    Toast.makeText(this, "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
-                });
-        } else {
-            // Thêm vào yêu thích
-            java.util.Map<String, Object> favorite = new java.util.HashMap<>();
-            favorite.put("userId", currentUserId);
-            favorite.put("roomId", room.getId());
-            favorite.put("createdAt", System.currentTimeMillis());
-
-            firebaseManager.getFirestore()
-                .collection("favorites")
-                .add(favorite)
-                .addOnSuccessListener(docRef -> {
-                    room.setFavorite(true);
-                    adapter.notifyItemChanged(position);
-                    Toast.makeText(this, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
-                });
-        }
     }
 
     private void setListeners() {
@@ -152,80 +101,82 @@ public class FilteredRoomsActivity extends AppCompatActivity {
         showLoading(true);
 
         firebaseManager.getFirestore()
-            .collection("rooms")
-            .whereEqualTo("status", "active")
-            .get()
-            .addOnSuccessListener(querySnapshot -> {
-                allRooms.clear();
+                .collection("rooms")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    allRooms.clear();
 
-                for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                    Room room = doc.toObject(Room.class);
-                    if (room != null) {
-                        room.setId(doc.getId());
-                        allRooms.add(room);
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+
+                        Room room = doc.toObject(Room.class);
+
+                        if (room != null) {
+                            room.setId(doc.getId());
+
+                            if (!room.isAvailable()) continue;
+
+                            allRooms.add(room);
+                        }
                     }
-                }
 
-                applyFilters();
-                showLoading(false);
-            })
-            .addOnFailureListener(e -> {
-                showLoading(false);
-                Log.e(TAG, "Error loading rooms: " + e.getMessage());
-                Toast.makeText(this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
-            });
+                    applyFilters();
+                    showLoading(false);
+                })
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    Log.e(TAG, "Firebase error: " + e.getMessage());
+                    Toast.makeText(this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void applyFilters() {
         roomList.clear();
 
         for (Room room : allRooms) {
+
             boolean match = true;
 
-            // Filter by cheap price (< 3,000,000 VND)
-            if (filterCheap && room.getPrice() >= 3000000) {
-                match = false;
+            if (filterCheap && room.getPrice() >= 3000000) match = false;
+
+            if (filterAC && !safeBool(room.isHasAC())) match = false;
+
+            if (filterWifi && !safeBool(room.isHasWifi())) match = false;
+
+            if (filterParking && !safeBool(room.isHasParking())) match = false;
+
+            if (filterSpacious && room.getArea() < 20) match = false;
+
+            if (filterNear) {
+
+                String addr = safeString(room.getAddress());
+                String city = safeString(room.getCity());
+                String desc = safeString(room.getDescription());
+
+                boolean near = false;
+
+                if (city.contains("hcm") || city.contains("ho chi minh") ||
+                        city.contains("tp.hcm") || city.contains("sài gòn"))
+                    near = true;
+
+                if (addr.contains("gần") || desc.contains("gần"))
+                    near = true;
+
+                if (!near) match = false;
             }
 
-            // Filter by AC
-            if (filterAC && !room.isHasAC()) {
-                match = false;
-            }
-
-            // Filter by WiFi
-            if (filterWifi && !room.isHasWifi()) {
-                match = false;
-            }
-
-            // Filter by Parking
-            if (filterParking && !room.isHasParking()) {
-                match = false;
-            }
-
-            // Filter by spacious (>= 20m2)
-            if (filterSpacious && room.getArea() < 20) {
-                match = false;
-            }
-
-            // Filter near school - check description/address contains school-related keywords
-            if (filterNearSchool) {
-                String address = room.getAddress() != null ? room.getAddress().toLowerCase() : "";
-                String description = room.getDescription() != null ? room.getDescription().toLowerCase() : "";
-                boolean nearSchool = address.contains("trường") || address.contains("đại học") 
-                    || address.contains("cao đẳng") || description.contains("gần trường")
-                    || description.contains("gần đại học");
-                if (!nearSchool) {
-                    match = false;
-                }
-            }
-
-            if (match) {
-                roomList.add(room);
-            }
+            if (match) roomList.add(room);
         }
 
         adapter.notifyDataSetChanged();
         updateUI();
+    }
+
+    private String safeString(String s) {
+        return s == null ? "" : s.toLowerCase().trim();
+    }
+
+    private boolean safeBool(Boolean b) {
+        return b != null && b;
     }
 
     private void updateUI() {

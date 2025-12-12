@@ -19,6 +19,8 @@ public class Room implements Serializable {
     private double area;             // Diện tích (m2)
     private List<String> imageUrls;  // Danh sách URL hình ảnh
     private String thumbnailUrl;     // Hình đại diện
+    private double latitude;    // vĩ độ
+    private double longitude;   // kinh độ
     
     // Tiện ích
     private boolean hasWifi;
@@ -96,6 +98,21 @@ public class Room implements Serializable {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     public double getPrice() { return price; }
     public void setPrice(double price) { 

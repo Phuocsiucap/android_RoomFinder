@@ -47,7 +47,14 @@
             android:textSize="12sp"
             android:maxLines="2"
             android:ellipsize="end"/>
-
+        <TextView
+            android:id="@+id/khoangcach"
+            android:layout_width="220dp"
+            android:layout_height="20dp"
+            android:text="Location"
+            android:textSize="12sp"
+            android:maxLines="2"
+            android:ellipsize="end"/>
 
     </LinearLayout>
 </LinearLayout>

@@ -43,6 +43,7 @@ public class PostRoomActivity extends AppCompatActivity {
 
     private static final String TAG = "PostRoomActivity";
     private static final int MAX_IMAGES = 5;
+    private ImageView ivLocationIcon;
 
     // UI Components
     private EditText etTitle, etDescription, etPrice, etArea;
@@ -115,7 +116,7 @@ public class PostRoomActivity extends AppCompatActivity {
         etAddress = findViewById(R.id.etAddress);
         etDistrict = findViewById(R.id.etDistrict);
         etCity = findViewById(R.id.etCity);
-
+        ivLocationIcon = findViewById(R.id.ettAddress);
         chipWifi = findViewById(R.id.chipWifi);
         chipAC = findViewById(R.id.chipAC);
         chipParking = findViewById(R.id.chipParking);
@@ -154,6 +155,23 @@ public class PostRoomActivity extends AppCompatActivity {
         });
 
         btnSubmit.setOnClickListener(v -> submitRoom());
+        ivLocationIcon.setOnClickListener(v -> {
+            getCurrentLocation();
+        });
+    }
+    private double latitude = 21.053694;   // vĩ độ mặc định
+    private double longitude = 105.735139;
+    private void getCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+            return;
+        }
+        double latitude = 21.053694;
+        double longitude = 105.735139;
+
+        Toast.makeText(this, "Đã lấy vị trí hiện tại", Toast.LENGTH_SHORT).show();
     }
 
     private void openImagePicker() {
@@ -238,7 +256,6 @@ public class PostRoomActivity extends AppCompatActivity {
         double price = Double.parseDouble(priceStr);
         double area = areaStr.isEmpty() ? 0 : Double.parseDouble(areaStr);
 
-        // Create room object
         String roomId = UUID.randomUUID().toString();
         
         Map<String, Object> roomData = new HashMap<>();
@@ -251,7 +268,10 @@ public class PostRoomActivity extends AppCompatActivity {
         roomData.put("address", address);
         roomData.put("district", district);
         roomData.put("city", city);
-        
+        roomData.put("latitude", latitude);
+        roomData.put("longitude", longitude);
+
+
         // Amenities
         roomData.put("hasWifi", chipWifi.isChecked());
         roomData.put("hasAC", chipAC.isChecked());

@@ -24,6 +24,8 @@ public class RoomSearchAdapter extends RecyclerView.Adapter<RoomSearchAdapter.Ro
     private Context context;
     private List<Room> roomList;
     private OnRoomClickListener listener;
+    private double userLatitude = 0;
+    private double userLongitude = 0;
 
     public interface OnRoomClickListener {
         void onRoomClick(Room room);
@@ -34,6 +36,19 @@ public class RoomSearchAdapter extends RecyclerView.Adapter<RoomSearchAdapter.Ro
         this.context = context;
         this.roomList = roomList;
         this.listener = listener;
+    }
+    public void setUserLocation(double lat, double lng) {
+        this.userLatitude = lat;
+        this.userLongitude = lng;
+        notifyDataSetChanged();
+    }
+    // Thêm ở class RoomSearchAdapter, bên cạnh setUserLocation
+    public Double getUserLat() {
+        return userLatitude != 0 ? userLatitude : null;
+    }
+
+    public Double getUserLng() {
+        return userLongitude != 0 ? userLongitude : null;
     }
 
     @NonNull
@@ -49,7 +64,27 @@ public class RoomSearchAdapter extends RecyclerView.Adapter<RoomSearchAdapter.Ro
     public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
         Room room = roomList.get(position);
         holder.bind(room, position);
+        TextView tvDistance = holder.itemView.findViewById(R.id.khoangcach);
+        if (userLatitude != 0 && userLongitude != 0
+                && room.getLatitude() != 0 && room.getLongitude() != 0) {
+            double distance = calculateDistanceKm(userLatitude, userLongitude,
+                    room.getLatitude(), room.getLongitude());
+            tvDistance.setText(String.format("%.1f km", distance));
+        } else {
+            tvDistance.setText("Chưa xác định");
+        }
     }
+    private double calculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // bán kính Trái Đất (km)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // trả về km
+    }
+
 
     @Override
     public int getItemCount() {

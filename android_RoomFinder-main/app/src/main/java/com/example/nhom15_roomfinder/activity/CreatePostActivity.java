@@ -12,6 +12,21 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
+import com.mapbox.maps.MapView;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener;
+
+import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.maps.MapView;
+import com.mapbox.maps.MapboxMap;
+import com.mapbox.maps.Style;
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin;
+import com.mapbox.maps.plugin.locationcomponent.LocationComponentUtils;
+import com.mapbox.maps.plugin.Plugin;
+import com.mapbox.geojson.Point;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +45,10 @@ public class CreatePostActivity extends AppCompatActivity {
     private Button btnAddMore, btnPost;
     private FrameLayout btnAddImage;
     private ImageView ivImage1, ivImage2;
+    private MapView mapView;
+    private double latitude = 0;
+    private double longitude = 0;
+
 
     private List<Uri> selectedImages = new ArrayList<>();
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -50,6 +69,7 @@ public class CreatePostActivity extends AppCompatActivity {
         etDescription = findViewById(R.id.etDescription);
         etPrice = findViewById(R.id.etPrice);
         etAddress = findViewById(R.id.etAddress);
+        mapView = findViewById(R.id.mapView);
 
         // Khởi tạo ChipGroup
         chipGroupAmenities = findViewById(R.id.chipGroupAmenities);
@@ -65,12 +85,17 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        etAddress.setOnClickListener(v -> {
+            getCurrentLocation();
+        });
+
         // Listener cho nút thêm ảnh
         btnAddImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openImagePicker();
             }
+
         });
 
         // Listener cho từng image view để thay đổi ảnh
@@ -105,6 +130,73 @@ public class CreatePostActivity extends AppCompatActivity {
                 validateAndPost();
             }
         });
+    }
+    private void getCurrentLocation() {
+        // Kiểm tra quyền
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    1001);
+            return;
+        }
+
+        // Load style Mapbox trước khi sử dụng LocationComponent
+        mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS, style -> {
+
+            // Lấy plugin LocationComponent
+            LocationComponentPlugin locationComponent =
+                    mapView.getPlugin(Plugin.MAPBOX_LOCATION_COMPONENT_PLUGIN_ID);
+
+            if (locationComponent == null) {
+                Toast.makeText(this, "Không lấy được plugin vị trí!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Bật location component
+            locationComponent.updateSettings(settings -> {
+                settings.setEnabled(true);
+                settings.setPulsingEnabled(true);
+                return null;
+            });
+
+            // Lấy listener để nhận vị trí hiện tại
+            OnIndicatorPositionChangedListener listener = new OnIndicatorPositionChangedListener() {
+                @Override
+                public void onIndicatorPositionChanged(Point point) {
+                    latitude = point.latitude();
+                    longitude = point.longitude();
+
+                    etAddress.setText(latitude + ", " + longitude);
+
+                    Toast.makeText(CreatePostActivity.this, "Đã lấy vị trí hiện tại!", Toast.LENGTH_SHORT).show();
+
+                    // Gỡ listener đúng
+                    LocationComponentPlugin locationComponent =
+                            mapView.getPlugin(Plugin.MAPBOX_LOCATION_COMPONENT_PLUGIN_ID);
+                    if (locationComponent != null) {
+                        locationComponent.removeOnIndicatorPositionChangedListener(this);
+                    }
+                }
+            };
+
+
+            locationComponent.addOnIndicatorPositionChangedListener(listener);
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1001) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getCurrentLocation();
+            } else {
+                Toast.makeText(this, "Bạn cần bật quyền vị trí!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void openImagePicker() {
